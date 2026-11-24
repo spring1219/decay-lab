@@ -1,0 +1,164 @@
+{
+  "trainingCurves": 1500,
+  "calibrationSeed": 417721,
+  "distanceLimit": 0.20940380454304172,
+  "rows": [
+    {
+      "id": "reference",
+      "seed": 964239,
+      "perModel": 120,
+      "samples": 47,
+      "total": 360,
+      "aiccCorrect": 228,
+      "knnCorrect": 283,
+      "clearCount": 137,
+      "clearCorrect": 121
+    },
+    {
+      "id": "irregular",
+      "seed": 164729,
+      "perModel": 80,
+      "samples": 27,
+      "total": 240,
+      "aiccCorrect": 147,
+      "knnCorrect": 180,
+      "clearCount": 118,
+      "clearCorrect": 98
+    },
+    {
+      "id": "correlated",
+      "seed": 708731,
+      "perModel": 80,
+      "samples": 47,
+      "total": 240,
+      "aiccCorrect": 133,
+      "knnCorrect": 172,
+      "clearCount": 77,
+      "clearCorrect": 66
+    }
+  ],
+  "matched": [
+    {
+      "id": "reference",
+      "total": 360,
+      "accepted": 137,
+      "aiccOnly": {
+        "errors": 32,
+        "doubleAsSingle": 18,
+        "doubleAccepted": 46
+      },
+      "fitOnly": {
+        "errors": 30,
+        "doubleAsSingle": 19,
+        "doubleAccepted": 44
+      },
+      "combined": {
+        "errors": 16,
+        "doubleAsSingle": 10,
+        "doubleAccepted": 24
+      }
+    },
+    {
+      "id": "irregular",
+      "total": 240,
+      "accepted": 118,
+      "aiccOnly": {
+        "errors": 26,
+        "doubleAsSingle": 21,
+        "doubleAccepted": 32
+      },
+      "fitOnly": {
+        "errors": 31,
+        "doubleAsSingle": 26,
+        "doubleAccepted": 33
+      },
+      "combined": {
+        "errors": 20,
+        "doubleAsSingle": 14,
+        "doubleAccepted": 21
+      }
+    },
+    {
+      "id": "correlated",
+      "total": 240,
+      "accepted": 77,
+      "aiccOnly": {
+        "errors": 28,
+        "doubleAsSingle": 4,
+        "doubleAccepted": 29
+      },
+      "fitOnly": {
+        "errors": 26,
+        "doubleAsSingle": 10,
+        "doubleAccepted": 20
+      },
+      "combined": {
+        "errors": 11,
+        "doubleAsSingle": 5,
+        "doubleAccepted": 14
+      }
+    },
+    {
+      "id": "pairedFull",
+      "total": 240,
+      "accepted": 100,
+      "aiccOnly": {
+        "errors": 27,
+        "doubleAsSingle": 18,
+        "doubleAccepted": 22
+      },
+      "fitOnly": {
+        "errors": 29,
+        "doubleAsSingle": 19,
+        "doubleAccepted": 22
+      },
+      "combined": {
+        "errors": 20,
+        "doubleAsSingle": 8,
+        "doubleAccepted": 10
+      }
+    },
+    {
+      "id": "pairedShort",
+      "total": 240,
+      "accepted": 112,
+      "aiccOnly": {
+        "errors": 54,
+        "doubleAsSingle": 40,
+        "doubleAccepted": 41
+      },
+      "fitOnly": {
+        "errors": 63,
+        "doubleAsSingle": 44,
+        "doubleAccepted": 44
+      },
+      "combined": {
+        "errors": 65,
+        "doubleAsSingle": 55,
+        "doubleAccepted": 55
+      }
+    }
+  ],
+  "pairedWindow": {
+    "seed": 713043,
+    "perModel": 80,
+    "samples": 24,
+    "shortFraction": 0.25,
+    "fitFlips": 59,
+    "shapeFlips": 107,
+    "shortMistakesWithoutWarnings": 65,
+    "flaggedByComparison": 55,
+    "shortCorrect": 47,
+    "flaggedCorrect": 2
+  },
+  "observed": {
+    "reference": "single",
+    "aiccLead": "double",
+    "knnLead": "single",
+    "points": 14,
+    "deltaAicc": 9.280256984114459,
+    "warnings": [
+      "disagree"
+    ]
+  }
+}

@@ -1,73 +1,136 @@
 <!doctype html>
-<html lang="zh-CN">
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="color-scheme" content="light">
-<title>Decay Lab · 衰减曲线实验室</title>
+<title>Decay Lab · Compare decay models</title>
 <style>
 :root{--ink:#162a2a;--muted:#4d6460;--shell:#eef2ec;--paper:#fcfdf9;--line:#d9e2db;--brand:#1b5349;--accent:#257869;--highlight:#e4efe6;--warn:#874818;--warnbg:#faefdd;--mono:ui-monospace,"IBM Plex Mono",monospace}
-*{box-sizing:border-box}body{margin:0;background:var(--shell);color:var(--ink);font:15px/1.65 system-ui,"Noto Sans SC",sans-serif}button,select{font:inherit}button,select,.file-button{min-height:42px;border:1px solid #b8c9bd;border-radius:7px;background:var(--paper);padding:7px 12px;color:var(--ink)}button,.file-button{cursor:pointer}button:hover,.file-button:hover{border-color:var(--accent);background:#eaf3ec}button:focus-visible,select:focus-visible,summary:focus-visible,.file-button:focus-within{outline:3px solid #287f70;outline-offset:2px}a{color:var(--brand)}code{font-family:var(--mono)}main{max-width:1180px;margin:auto;padding:0 5vw 44px}.mast{padding:23px 0 15px;border-bottom:1px solid #cdd9d0;display:flex;justify-content:space-between;gap:12px;align-items:center}.mark{font-weight:800;font-family:var(--mono);letter-spacing:-.04em;font-size:19px;display:flex;align-items:center;gap:10px}.mark i{width:12px;height:12px;border-radius:2px;background:var(--brand);display:inline-block;transform:rotate(-12deg)}.mast small{color:var(--muted)}header{padding:39px 0 26px}h1{font-size:clamp(33px,5vw,58px);font-weight:770;margin:0;line-height:1.14;letter-spacing:-.055em}header p{font-size:16px;color:var(--muted);margin:11px 0 0}.toolbar{display:flex;align-items:end;gap:10px;flex-wrap:wrap;margin-bottom:18px}.field{display:grid;gap:4px}.field label{color:var(--muted);font-size:12px}.file-button{background:var(--brand);color:#fff;border-color:var(--brand);display:inline-flex;align-items:center;position:relative}.file-button:hover{background:#286a5d}.file-button input{position:absolute;width:1px;height:1px;opacity:0}.push{margin-left:auto}.msg{margin:0 0 15px;color:#7e2e26;font-weight:650}.msg:empty{display:none}.grid{display:grid;grid-template-columns:minmax(0,1.95fr) minmax(285px,1fr);gap:16px}.card{min-width:0;background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:18px}.card h2{font-size:16px;margin:0;font-weight:760;line-height:1.4}.sub{font-size:12px;color:var(--muted);margin:3px 0 9px;overflow-wrap:anywhere}.legend{display:flex;gap:18px;flex-wrap:wrap;margin:9px 0 0;color:var(--muted);font-size:12px}.legend span::before{content:"";display:inline-block;width:12px;height:3px;background:var(--brand);vertical-align:middle;margin-right:6px}.legend .dots::before{height:5px;width:5px;border-radius:50%;background:#57666a}.legend .other::before{height:0;border-top:2px dashed #97623d;background:none}canvas{display:block;width:100%;height:290px}canvas#residual{height:105px}.card hr{border:0;border-top:1px solid var(--line);margin:8px 0}.verdict{margin:12px 0 16px;padding:11px 12px;background:var(--highlight);color:var(--brand);border-radius:6px;font-weight:650}.verdict[data-caution="true"]{background:var(--warnbg);color:var(--warn)}.result-block + .result-block{margin-top:20px}.table-wrap{overflow-x:auto}table{border-collapse:collapse;width:100%;font-size:13px}th,td{padding:7px 3px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}th:first-child,td:first-child{text-align:left}th{font-size:11px;color:var(--muted)}td:not(:first-child){font-family:var(--mono);font-variant-numeric:tabular-nums}.votes{display:grid;gap:6px;margin:8px 0}.vote{display:grid;grid-template-columns:5em 1fr 4ch;gap:8px;align-items:center;font-size:12px}.vote strong{text-align:right;font-family:var(--mono)}meter{width:100%;height:12px;accent-color:var(--accent)}.notes{margin-top:16px}.notes+ .notes{margin-top:9px}summary{color:var(--brand);font-weight:700;cursor:pointer}.notes p,.notes li{color:var(--muted);font-size:14px}.notes p:last-child{margin-bottom:0}.params{display:grid;gap:4px;font-size:13px;margin:8px 0 0}.params div{display:flex;justify-content:space-between;gap:8px}.params dt{color:var(--muted)}.params dd{margin:0;font-family:var(--mono);text-align:right}.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}@media(max-width:880px){.grid{grid-template-columns:1fr}.push{margin-left:0}.card{padding:15px}}@media(max-width:450px){main{padding-inline:12px}header{padding-top:25px}.mast small{display:none}canvas{height:235px}}
+*{box-sizing:border-box}body{margin:0;background:var(--shell);color:var(--ink);font:15px/1.65 system-ui,"Noto Sans SC",sans-serif}button,select{font:inherit}button,select,.file-button{min-height:42px;border:1px solid #b8c9bd;border-radius:7px;background:var(--paper);padding:7px 12px;color:var(--ink)}button,.file-button{cursor:pointer}button:hover,.file-button:hover{border-color:var(--accent);background:#eaf3ec}button:focus-visible,select:focus-visible,summary:focus-visible,.file-button:focus-within{outline:3px solid #287f70;outline-offset:2px}a{color:var(--brand)}code{font-family:var(--mono)}main{max-width:1180px;margin:auto;padding:0 5vw 44px}.mast{padding:23px 0 15px;border-bottom:1px solid #cdd9d0;display:flex;justify-content:space-between;gap:12px;align-items:center}.mark{font-weight:800;font-family:var(--mono);letter-spacing:-.04em;font-size:19px;display:flex;align-items:center;gap:10px}.mark i{width:12px;height:12px;border-radius:2px;background:var(--brand);display:inline-block;transform:rotate(-12deg)}.mast small{color:var(--muted)}header{padding:39px 0 26px}h1{font-size:clamp(33px,5vw,58px);font-weight:770;margin:0;line-height:1.14;letter-spacing:-.055em}header p{font-size:16px;color:var(--muted);margin:11px 0 0}.toolbar{display:flex;align-items:end;gap:10px;flex-wrap:wrap;margin-bottom:18px}.field{display:grid;gap:4px}.field label{color:var(--muted);font-size:12px}.file-button{background:var(--brand);color:#fff;border-color:var(--brand);display:inline-flex;align-items:center;position:relative}.file-button:hover{background:#286a5d}.file-button input{position:absolute;width:1px;height:1px;opacity:0}.push{margin-left:auto}.msg{margin:0 0 15px;color:#7e2e26;font-weight:650}.msg:empty{display:none}.grid{display:grid;grid-template-columns:minmax(0,1.95fr) minmax(285px,1fr);gap:16px}.card{min-width:0;background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:18px}.card h2{font-size:16px;margin:0;font-weight:760;line-height:1.4}.sub{font-size:12px;color:var(--muted);margin:3px 0 9px;overflow-wrap:anywhere}.legend{display:flex;gap:18px;flex-wrap:wrap;margin:9px 0 0;color:var(--muted);font-size:12px}.legend span::before{content:"";display:inline-block;width:12px;height:3px;background:var(--brand);vertical-align:middle;margin-right:6px}.legend .dots::before{height:5px;width:5px;border-radius:50%;background:#57666a}.legend .other::before{height:0;border-top:2px dashed #97623d;background:none}canvas{display:block;width:100%;height:290px}canvas#residual{height:105px}canvas[hidden]{display:none}.card hr{border:0;border-top:1px solid var(--line);margin:8px 0}.verdict{margin:12px 0 16px;padding:11px 12px;background:var(--highlight);color:var(--brand);border-radius:6px;font-weight:650}.verdict[data-caution="true"]{background:var(--warnbg);color:var(--warn)}.result-block + .result-block{margin-top:20px}.table-wrap{overflow-x:auto}table{border-collapse:collapse;width:100%;font-size:13px}th,td{padding:7px 3px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}th:first-child,td:first-child{text-align:left}th{font-size:11px;color:var(--muted)}td:not(:first-child){font-family:var(--mono);font-variant-numeric:tabular-nums}.votes{display:grid;gap:6px;margin:8px 0}.vote{display:grid;grid-template-columns:5em 1fr 4ch;gap:8px;align-items:center;font-size:12px}.vote strong{text-align:right;font-family:var(--mono)}meter{width:100%;height:12px;accent-color:var(--accent)}.notes{margin-top:16px}.notes+ .notes{margin-top:9px}summary{color:var(--brand);font-weight:700;cursor:pointer}.notes p,.notes li{color:var(--muted);font-size:14px}.notes p:last-child{margin-bottom:0}.params{display:grid;gap:4px;font-size:13px;margin:8px 0 0}.params div{display:flex;justify-content:space-between;gap:8px}.params dt{color:var(--muted)}.params dd{margin:0;font-family:var(--mono);text-align:right}.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}@media(max-width:880px){.grid{grid-template-columns:1fr}.push{margin-left:0}.card{padding:15px}}@media(max-width:450px){main{padding-inline:12px}header{padding-top:25px}.mast small{display:none}canvas{height:235px}}
+.mast-actions{display:flex;align-items:center;gap:12px}.mast-actions button{padding:3px 10px;min-height:34px;font-size:13px}.chart-axis{font-size:12px;color:var(--muted);margin:8px 0 -2px}.chart-axis.horizontal{text-align:right;margin:0 4px 0 0}.case-note{background:#eaf1e7;border-radius:6px;color:var(--muted);padding:7px 10px;margin:8px 0;font-size:13px}.verdict ul{font-size:13px;line-height:1.5;font-weight:400;margin:5px 0 0;padding-left:17px}.leader-pair{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:0 0 16px}.leader-pair div{display:grid;gap:2px;padding:7px 8px;background:#eef2ec;border:1px solid var(--line);border-radius:6px}.leader-pair dt{color:var(--muted);font-size:12px}.leader-pair dd{margin:0;font-size:13px;font-weight:700;line-height:1.3}.vote{grid-template-columns:minmax(8em,1.7fr) minmax(40px,1fr) 4ch;line-height:1.3}.benchmark th,.benchmark td{padding:7px 10px}.benchmark th:first-child{white-space:normal;text-align:left;font-size:13px}.formula{margin-bottom:0}.table-wrap:focus-visible{outline:2px solid var(--accent);outline-offset:2px}@media(max-width:450px){.mast-actions{gap:5px}.card{padding:13px}.benchmark th,.benchmark td{padding:6px}.chart-axis{margin-top:5px}}
+
+.window-card{margin-bottom:16px;padding:15px 18px}.window-controls{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,290px),1fr));gap:10px 26px;margin-top:8px}.window-controls .control{min-width:0}.control-label{display:flex;justify-content:space-between;align-items:baseline;gap:10px;font-size:13px;font-weight:700}.control-label output{font:12px var(--mono);color:var(--muted);text-align:right}.window-controls input[type=range]{display:block;width:100%;margin:5px 0;min-height:28px;accent-color:var(--brand);cursor:pointer}.window-controls input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}.window-controls input:disabled{cursor:default}.window-actions{display:flex;gap:7px;flex-wrap:wrap}.window-actions button{min-height:34px;padding:4px 10px;font-size:12px}.window-actions button:disabled,button:disabled{cursor:default;opacity:.53}.window-actions button:disabled:hover{background:var(--paper);border-color:#b8c9bd}.window-message{margin:6px 0 0;color:var(--brand);font-size:13px}.window-message:empty{display:none}.legend .excluded::before{height:6px;width:6px;border-radius:50%;background:#b4bfba}.method-comparison{padding-top:14px;margin-top:14px;border-top:1px solid var(--line)}.method-comparison h3{font-size:15px;margin:0}.method-comparison .sub{margin-bottom:5px}.method-comparison .benchmark th:first-child{min-width:140px}@media(max-width:450px){.window-card{padding:12px}.window-actions button{min-height:38px}}
+.legend .third::before{height:0;border-top:2px dashed #797992;background:none}.legend .extrap::before{height:0;border-top:2px dashed #528c79;background:none}.extrap-choice{display:flex;gap:6px;align-items:center;margin-top:8px;color:var(--muted);font-size:12px}.extrap-choice[hidden]{display:none}.extrap-choice input{accent-color:var(--brand)}
 </style>
 </head>
 <body>
 <main>
-<div class="mast"><span class="mark"><i aria-hidden="true"></i>Decay Lab</span><small>浏览器端计算 · 数据留在本机</small></div>
-<header><h1>衰减曲线实验室</h1><p>给一条衰减曲线，比一比三种模型，看看数据能把它们区分到什么程度。</p></header>
+<div class="mast">
+  <span class="mark"><i aria-hidden="true"></i>Decay Lab</span>
+  <div class="mast-actions"><small data-i18n="local"></small>
+  <button type="button" id="language" aria-label="Switch language">中文</button></div>
+</div>
+<header><h1 data-i18n="title"></h1><p data-i18n="intro"></p></header>
 <div class="toolbar">
-<div class="field"><label for="sample">示例数据</label><select id="sample"><option value="0">单指数 · 清晰</option><option value="1">双指数 · 清晰</option><option value="2">拉伸指数 · 清晰</option><option value="3">双指数 · 高噪声</option></select></div>
-<label class="file-button"><span>导入 CSV</span><input id="file" type="file" accept=".csv,.txt,text/csv" aria-describedby="csvhelp"></label>
-<span class="sr" id="csvhelp">第一列为时间，第二列为信号，首行可为 time,signal。</span>
-<button class="push" type="button" id="raw">下载当前数据</button>
-<button type="button" id="export">下载分析结果</button>
+  <div class="field">
+    <label for="sample" data-i18n="examples"></label>
+    <select id="sample">
+      <option value="0" data-i18n="sample0"></option><option value="1" data-i18n="sample1"></option>
+      <option value="2" data-i18n="sample2"></option><option value="3" data-i18n="sample3"></option>
+      <option value="4" data-i18n="sample4"></option>
+    </select>
+  </div>
+  <label class="file-button"><span data-i18n="import"></span><input id="file" type="file" accept=".csv,.txt,text/csv" aria-describedby="csvhelp"></label>
+  <span class="sr" id="csvhelp" data-i18n="csvHelp"></span>
+  <button class="push" type="button" id="raw" data-i18n="downloadData"></button>
+  <button type="button" id="export" data-i18n="downloadReport"></button>
 </div>
 <p id="error" class="msg" role="alert"></p>
+<section class="card window-card" aria-labelledby="window-heading">
+  <h2 id="window-heading" data-i18n="windowTitle"></h2>
+  <p class="sub" id="window-help" data-i18n="windowHelp"></p>
+  <div class="window-controls">
+    <div class="control">
+      <div class="control-label"><label for="window-end" data-i18n="windowEnd"></label><output id="window-count" for="window-end"></output></div>
+      <input id="window-end" type="range" min="12" max="64" value="64" aria-describedby="window-help">
+      <div class="window-actions">
+        <button type="button" id="window-early" data-i18n="earlyWindow"></button>
+        <button type="button" id="window-full" data-i18n="fullWindow"></button>
+      </div>
+    </div>
+    <div class="control" id="noise-control" hidden>
+      <div class="control-label"><label for="noise" data-i18n="noise"></label><output id="noise-value" for="noise"></output></div>
+      <input id="noise" type="range" min="0" max="10" step="0.1" value="0.6" aria-describedby="noise-help">
+      <div class="window-actions"><button type="button" id="noise-reset" data-i18n="resetNoise"></button></div>
+      <p class="sub" id="noise-help" data-i18n="noiseHelp"></p>
+    </div>
+  </div>
+  <p class="window-message" id="window-pending" aria-live="polite"></p>
+  <p class="window-message" id="window-summary"></p>
+</section>
 <div class="grid">
-<section class="card">
-<h2>观测与拟合</h2><p class="sub" id="dataset"></p>
-<canvas id="plot" role="img" aria-label="散点与候选模型拟合曲线"></canvas>
-<div class="legend"><span class="dots">观测点</span><span>AICc 最低</span><span class="other">其余候选</span></div>
-<hr><h2>残差</h2><p class="sub">观测值减去 AICc 最低模型的拟合值</p><canvas id="residual" role="img" aria-label="最优候选模型残差图"></canvas>
-</section>
-<section class="card">
-<h2>模型比较</h2><p class="verdict" id="verdict" aria-live="polite"></p>
-<div class="result-block"><h2>全数据拟合</h2><p class="sub">ΔAICc 越小越好。RMSE 与信号同单位。</p>
-<div class="table-wrap"><table><thead><tr><th>候选模型</th><th>ΔAICc</th><th>RMSE</th></tr></thead><tbody id="fits"></tbody></table></div><dl id="params" class="params"></dl></div>
-<div class="result-block"><h2>机器学习的曲线形状提示</h2><p class="sub">近邻投票比例，反映模拟训练集里相似曲线的类别构成。</p><div id="votes" class="votes"></div></div>
-</section>
+  <section class="card" aria-labelledby="fits-heading">
+    <h2 id="fits-heading" data-i18n="observations"></h2><p class="sub" id="dataset"></p>
+    <p class="case-note" id="case-note" hidden><span id="case-desc"></span> <a id="case-source" href="https://www.itl.nist.gov/div898/strd/nls/data/misra1a.shtml" target="_blank" rel="noopener noreferrer" data-i18n="nistLink"></a></p>
+    <p class="chart-axis" id="signal-axis"></p><canvas id="plot" role="img" aria-describedby="dataset signal-axis"></canvas><p class="chart-axis horizontal" id="predictor-axis"></p>
+    <div class="legend"><span class="dots" data-i18n="points"></span><span data-i18n="leadFit"></span><span class="other" data-i18n="secondFit"></span><span class="third" data-i18n="thirdFit"></span><span class="extrap" id="extrap-legend" data-i18n="extrapLegend" hidden></span><span class="excluded" id="excluded" data-i18n="excluded" hidden></span></div>
+    <label class="extrap-choice" id="extrap-choice" hidden><input id="extrapolate" type="checkbox" checked> <span data-i18n="extrapolate"></span></label>
+    <hr><h2 data-i18n="residual"></h2><p class="sub" data-i18n="residualHelp"></p>
+    <canvas id="residual" role="img"></canvas>
+  </section>
+  <section class="card" aria-labelledby="comparison-heading">
+    <h2 id="comparison-heading" data-i18n="compare"></h2>
+    <div class="verdict" id="verdict" role="status"><strong id="verdict-title"></strong><ul id="warnings"></ul></div>
+    <dl class="leader-pair" id="leaders"></dl>
+    <div class="result-block">
+      <h2 data-i18n="fitRank"></h2><p class="sub" data-i18n="fitRankHelp"></p>
+      <div class="table-wrap"><table><thead><tr><th data-i18n="model"></th><th>ΔAICc</th><th>RMSE</th></tr></thead><tbody id="fits"></tbody></table></div>
+      <dl id="params" class="params"></dl>
+    </div>
+    <div class="result-block"><h2 data-i18n="knn"></h2><p class="sub" data-i18n="knnHelp"></p><div id="votes" class="votes"></div></div>
+  </section>
 </div>
-<details class="card notes" open><summary>模型、训练数据与适用条件</summary>
-<p>三类模型都有常数基线 C：单指数 <code>C+A·exp(-t/τ)</code>、双指数 <code>C+A₁·exp(-t/τ₁)+A₂·exp(-t/τ₂)</code>、拉伸指数 <code>C+A·exp(-(t/τ)^β)</code>。把首个时间点视为 t=0，振幅约束为非负。候选参数通过网格搜索估计。</p>
-<p id="validation"></p>
-<p>ΔAICc 小于 2 的候选会提示难以区分。AICc 假设残差独立、近似同方差。拟合排序和近邻提示都受候选模型、测量窗口、时间误差、噪声与训练数据影响，尤其在信号变化小或两种时间尺度接近时。训练集与验证集均为模拟数据。投票比例不是模型正确的概率。</p>
+<section class="card notes" aria-labelledby="evidence-heading">
+  <h2 id="evidence-heading" data-i18n="benchmark"></h2><p data-i18n="benchmarkIntro"></p>
+  <div class="table-wrap"><table class="benchmark">
+    <thead><tr><th data-i18n="scenario"></th><th>N</th><th data-i18n="aiccAccuracy"></th><th data-i18n="knnAccuracy"></th><th data-i18n="coverage"></th><th data-i18n="clearAccuracy"></th></tr></thead>
+    <tbody id="benchmark-rows"></tbody>
+  </table></div>
+  <p class="sub" data-i18n="coverageHelp"></p>
+  <div class="method-comparison">
+    <h3 id="matched-heading" data-i18n="matchedTitle"></h3><p data-i18n="matchedHelp"></p>
+    <div class="table-wrap" tabindex="0" role="region" aria-labelledby="matched-heading"><table class="benchmark">
+      <thead><tr><th data-i18n="scenario"></th><th data-i18n="matchedCoverage"></th><th data-i18n="aiccErrors"></th><th data-i18n="fitOnlyErrors"></th><th data-i18n="combinedErrors"></th><th data-i18n="aiccDoubleErrors"></th><th data-i18n="combinedDoubleErrors"></th></tr></thead>
+      <tbody id="matched-rows"></tbody>
+    </table></div>
+    <p class="sub" data-i18n="matchedScope"></p>
+    <p class="sub" id="ablation-note"></p>
+    <p class="sub" id="paired-finding"></p>
+  </div>
+
+</section>
+<details class="card notes"><summary data-i18n="method"></summary>
+  <ul class="formula"><li data-i18n="singleFormula"></li><li data-i18n="doubleFormula"></li><li data-i18n="stretchFormula"></li></ul>
+  <p data-i18n="training"></p><p data-i18n="fitBounds"></p><p data-i18n="caveat"></p>
 </details>
-<details class="card notes"><summary>CSV 格式及开发说明</summary><p>两列数值，逗号、制表符或分号分隔。首行可以是 <code>time,signal</code>，或直接从数据开始。支持 12 至 2,000 个互不重复的时间点。时间行可乱序，内部会排序。</p><p>本原型由 ChatGPT Codex 辅助完成，包含模型实现、界面与验证脚本。示例和训练数据为程序生成。</p></details>
+<details class="card notes"><summary data-i18n="csvMethod"></summary><p data-i18n="csvFormat"></p><p data-i18n="disclosure"></p></details>
 </main>
 <script>
 "use strict";
 
 const models = [
-  { name: "单指数", key: "single" },
-  { name: "双指数", key: "double" },
-  { name: "拉伸指数", key: "stretched" }
+  { key: "single" },
+  { key: "double" },
+  { key: "stretched" }
 ];
 
 function parseCsv(csv) {
   const lines = csv.replace(/^\uFEFF/, "").trim().split(/\r?\n/).filter(line => line.trim());
-  const hasHeader = /^\s*"?time"?\s*[,;\t]\s*"?signal"?\s*$/i.test(lines[0] || "");
+  const hasHeader = /^\s*"?(?:time|x)"?\s*[,;\t]\s*"?signal"?\s*$/i.test(lines[0] || "");
   const rows = lines.slice(Number(hasHeader));
-  if (rows.length < 12 || rows.length > 2000) throw Error("CSV 需要 12 至 2,000 行观测数据。");
+  if (rows.length < 12 || rows.length > 2000) throw Error("csvCount");
   const separator = rows[0].includes("\t") ? "\t" : rows[0].includes(";") ? ";" : ",";
   const number = /^[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:e[+-]?\d+)?$/i;
   const data = rows.map((line, index) => {
     const columns = line.split(separator).map(s => s.trim().replace(/^"(.*)"$/, "$1").trim());
     if (columns.length !== 2 || columns.some(s => !number.test(s) || !Number.isFinite(Number(s)))) {
-      throw Error("第 " + (index + 1 + Number(hasHeader)) + " 个非空行须包含两个有限数值。");
+      throw Object.assign(Error("csvNumbers"), { detail:index + 1 + Number(hasHeader) });
     }
     return columns.map(Number);
   }).sort((a, b) => a[0] - b[0]);
   if (data.some((row, i) => i > 0 && row[0] === data[i - 1][0])) {
-    throw Error("存在重复的时间点，请先合并重复测量。");
+    throw Error("duplicateX");
   }
   return data;
 }
@@ -105,12 +168,12 @@ function normalized(data) {
   let divisor = 0;
   for (const [, y] of data) divisor = Math.max(divisor, Math.abs(y));
   if (!Number.isFinite(duration) || duration <= 0 || divisor === 0) {
-    throw Error("需要有限的时间跨度与随时间变化的信号。");
+    throw Error("invalidSpan");
   }
   const values = data.map(([, y]) => y / divisor);
   const low = Math.min(...values);
   const signalSpan = Math.max(...values) - low;
-  if (signalSpan <= 1e-12) throw Error("信号变化太小，无法比较衰减形状。");
+  if (signalSpan <= 1e-12) throw Error("lowVariation");
   return {
     duration, divisor, low, signalSpan,
     data: data.map(([t], i) => [(t - first) / duration, (values[i] - low) / signalSpan])
@@ -132,7 +195,7 @@ function features(data) {
   const mean = result.reduce((sum, value) => sum + value, 0) / result.length;
   const centered = result.map(value => value - mean);
   const magnitude = Math.hypot(...centered);
-  if (magnitude <= 1e-12) throw Error("等距重采样未捕捉到足够的信号变化。");
+  if (magnitude <= 1e-12) throw Error("unresolvedShape");
   return centered.map(value => value / magnitude);
 }
 
@@ -159,17 +222,19 @@ function classify(input, training) {
   const nearest = distances(features(input), training).slice(0, neighborCount);
   const tally = models.map(() => 0);
   for (const { kind } of nearest) tally[kind] += 1;
-  return { tally, top: tally.indexOf(Math.max(...tally)), distance: Math.sqrt(nearest[0].d) };
+  const votes = Math.max(...tally);
+  const leaders = models.map((_,i) => i).filter(i => tally[i] === votes);
+  return { tally, leaders, top:leaders.length === 1 ? leaders[0] : null, distance:Math.sqrt(nearest[0].d) };
 }
 
-function validateTraining(training) {
-  const rng = randomGenerator(964239);
+function validateTraining(training, seed = 964239) {
+  const rng = randomGenerator(seed);
   const distances = [];
   const matrix = models.map(() => models.map(() => 0));
   for (let kind = 0; kind < models.length; kind += 1) {
     for (let i = 0; i < validationSize; i += 1) {
       const guess = classify(generate(47, kind, rng), training);
-      matrix[kind][guess.top] += 1;
+      if (guess.top !== null) matrix[kind][guess.top] += 1;
       distances.push(guess.distance);
     }
   }
@@ -182,98 +247,182 @@ function validateTraining(training) {
   };
 }
 
-function fitShape(data, shape, second) {
-  let sx = 0, sy = 0, sz = 0, sxx = 0, sxy = 0, sxz = 0, szz = 0, szy = 0;
-  for (let i = 0; i < data.length; i += 1) {
-    const x = shape[i], y = data[i][1], z = second ? second[i] : 0;
-    sx += x; sy += y; sz += z;
-    sxx += x * x; sxy += x * y; sxz += x * z; szz += z * z; szy += z * y;
-  }
-  const n = data.length;
-  const xx = sxx - sx * sx / n, xy = sxy - sx * sy / n;
-  const zz = szz - sz * sz / n, zy = szy - sz * sy / n;
-  const xz = sxz - sx * sz / n;
-  const candidates = [[xx > 1e-13 ? Math.max(0, xy / xx) : 0, 0]];
-  if (second) {
-    candidates.push([0, zz > 1e-13 ? Math.max(0, zy / zz) : 0]);
-    const det = xx * zz - xz * xz;
-    if (xx > 0 && zz > 0 && det > 1e-10 * xx * zz) {
-      const ax = (xy * zz - zy * xz) / det;
-      const az = (zy * xx - xy * xz) / det;
-      if (ax > 0 && az > 0) candidates.push([ax, az]);
+const rateBounds = [0.08, 70];
+const betaBounds = [0.35, 0.95];
+
+function goldenMinimum(low, high, evaluate, best) {
+  const ratio = (Math.sqrt(5) - 1) / 2;
+  let left = evaluate(high - ratio * (high - low));
+  let right = evaluate(low + ratio * (high - low));
+  while (high - low > 1e-12) {
+    if (left.sse <= right.sse) {
+      high = right.x;
+      right = left;
+      left = evaluate(high - ratio * (high - low));
+    } else {
+      low = left.x;
+      left = right;
+      right = evaluate(low + ratio * (high - low));
     }
   }
-  let best;
-  for (const [a, b] of candidates) {
-    const c = (sy - a * sx - b * sz) / n;
-    let sse = 0;
-    for (let i = 0; i < n; i += 1) {
-      const predicted = c + a * shape[i] + (second ? b * second[i] : 0);
-      sse += (data[i][1] - predicted) ** 2;
-    }
-    if (!best || sse < best.sse) best = { a, b, c, sse };
-  }
-  return best;
+  return [best, left, right].sort((a, b) => a.sse - b.sse)[0];
 }
 
-function expGrid(low, high, size) {
-  return Array.from({ length: size }, (_, i) => low * (high / low) ** (i / (size - 1)));
+function simplexMinimum(initial, steps, bounds, evaluate) {
+  const point = coordinates => {
+    const x = coordinates.map((value, i) => Math.max(bounds[i][0], Math.min(bounds[i][1], value)));
+    return { x, fit:evaluate(x) };
+  };
+  const byError = (a, b) => a.fit.sse - b.fit.sse;
+  const simplex = [point(initial), ...initial.map((_, i) => {
+    const trial = [...initial];
+    trial[i] += (trial[i] + steps[i] <= bounds[i][1] ? 1 : -1) * steps[i];
+    return point(trial);
+  })];
+  for (let iteration = 0; iteration < 280; iteration += 1) {
+    simplex.sort(byError);
+    const [best, next, worst] = simplex;
+    if (Math.max(...[next, worst].flatMap(p => p.x.map((v, i) => Math.abs(v - best.x[i])))) < 1e-10) break;
+    const center = best.x.map((value, i) => (value + next.x[i]) / 2);
+    const fromWorst = weight => point(center.map((value, i) => value + weight * (value - worst.x[i])));
+    const reflected = fromWorst(1);
+    if (byError(reflected, best) < 0) {
+      const expanded = fromWorst(2);
+      simplex[2] = byError(expanded, reflected) < 0 ? expanded : reflected;
+    } else if (byError(reflected, next) < 0) {
+      simplex[2] = reflected;
+    } else {
+      const outer = byError(reflected, worst) < 0;
+      const contracted = fromWorst(outer ? 0.5 : -0.5);
+      if (byError(contracted, outer ? reflected : worst) < 0) {
+        simplex[2] = contracted;
+      } else {
+        simplex[1] = point(next.x.map((value, i) => (value + best.x[i]) / 2));
+        simplex[2] = point(worst.x.map((value, i) => (value + best.x[i]) / 2));
+      }
+    }
+  }
+  return simplex.sort(byError)[0].fit;
 }
 
 function fitModels(data) {
-  const grid = expGrid(0.08, 70, 51);
-  const curve = (rate, beta = 1) => data.map(([t]) => Math.exp(-Math.pow(rate * t, beta)));
-  const exponentials = grid.map(rate => curve(rate));
-  let single = { sse: Infinity }, double = { sse: Infinity }, stretched = { sse: Infinity };
-  for (let i = 0; i < grid.length; i += 1) {
-    const estimate = fitShape(data, exponentials[i]);
-    if (estimate.sse < single.sse) single = { ...estimate, rate: grid[i], beta: 1 };
-    for (let j = i + 1; j < grid.length; j += 1) {
-      const estimate = fitShape(data, exponentials[i], exponentials[j]);
-      if (estimate.sse < double.sse) double = { ...estimate, rate: grid[i], fast: grid[j], beta: 1 };
+  const n = data.length;
+  const time = Float64Array.from(data, ([t]) => t);
+  const signal = Float64Array.from(data, ([, y]) => y);
+  const mean = signal.reduce((sum, value) => sum + value, 0) / n;
+  const centered = signal.map(value => value - mean);
+  const yy = centered.reduce((sum, value) => sum + value * value, 0);
+
+  function shape(rate, beta = 1, powers) {
+    const factor = powers ? rate ** beta : rate;
+    const values = new Float64Array(n);
+    let sum = 0, squares = 0, xy = 0;
+    for (let i = 0; i < n; i += 1) {
+      const exponent = powers ? factor * powers[i] : beta === 1 ? rate * time[i] : (rate * time[i]) ** beta;
+      const value = Math.exp(-exponent);
+      values[i] = value;
+      sum += value;
+      squares += value * value;
+      xy += value * centered[i];
     }
-    for (let k = 0; k <= 24; k += 1) {
-      const beta = 0.35 + 0.60 * k / 24;
-      const estimate = fitShape(data, curve(grid[i], beta));
-      if (estimate.sse < stretched.sse) stretched = { ...estimate, rate: grid[i], beta };
-    }
+    return { values, sum, variance:squares - sum * sum / n, xy };
   }
-  function refine(best, kind) {
-    for (let step = 0.065; step > 0.001; step /= 2) {
-      const current = best;
-      for (const i of [-1, 0, 1]) {
-        for (const j of (kind === 0 ? [0] : [-1, 0, 1])) {
-          const rate = current.rate * Math.exp(i * step);
-          const fast = kind === 1 ? current.fast * Math.exp(j * step) : 0;
-          const beta = kind === 2 ? current.beta + j * step / 3 : 1;
-          if (rate < 0.08 || rate > 70 || (fast && (fast <= rate || fast > 70)) ||
-            (kind === 2 && (beta < 0.35 || beta > 0.95))) continue;
-          const estimate = fitShape(data, curve(rate, beta), fast ? curve(fast) : undefined);
-          if (estimate.sse < best.sse) best = { ...estimate, rate, fast, beta };
+
+  function profile(x, z, exact = false) {
+    let xz = 0;
+    if (z) {
+      for (let i = 0; i < n; i += 1) xz += x.values[i] * z.values[i];
+      xz -= x.sum * z.sum / n;
+    }
+    const xx = x.variance, xy = x.xy;
+    const candidates = [[xx > 1e-13 ? Math.max(0, xy / xx) : 0, 0]];
+    if (z) {
+      const zz = z.variance, zy = z.xy;
+      candidates.push([0, zz > 1e-13 ? Math.max(0, zy / zz) : 0]);
+      const det = xx * zz - xz * xz;
+      if (xx > 0 && zz > 0 && det > 1e-10 * xx * zz) {
+        const a = (xy * zz - zy * xz) / det;
+        const b = (zy * xx - xy * xz) / det;
+        if (a > 0 && b > 0) candidates.push([a,b]);
+      }
+    }
+    let best;
+    for (const [a,b] of candidates) {
+      const c = mean - (a * x.sum + b * (z?.sum ?? 0)) / n;
+      // Active coefficients solve the centered normal equations. Near zero,
+      // evaluate residuals directly to avoid cancellation in the moment formula.
+      let sse = yy - a * xy - b * (z?.xy ?? 0);
+      if (exact || sse <= 1e-8 * yy) {
+        sse = 0;
+        for (let i = 0; i < n; i += 1) {
+          const residual = signal[i] - (c + a * x.values[i] + (z ? b * z.values[i] : 0));
+          sse += residual * residual;
         }
       }
+      if (!best || sse < best.sse) best = { a,b,c,sse };
     }
     return best;
   }
-  return [single, double, stretched].map((trial, kind) => {
-    const fit = refine(trial, kind);
-    const p = [4, 6, 5][kind];
-    const n = data.length;
+
+  const logBounds = rateBounds.map(Math.log);
+  const steps = [(logBounds[1] - logBounds[0]) / 50, (betaBounds[1] - betaBounds[0]) / 24];
+  const grid = Array.from({length:51}, (_, i) => logBounds[0] + i * steps[0]);
+  const rates = grid.map(Math.exp);
+  const exponentials = rates.map(rate => shape(rate));
+  const betas = Array.from({length:25}, (_, i) => {
+    const beta = betaBounds[0] + i * steps[1];
+    return { beta, powers:time.map(value => value ** beta) };
+  });
+  let single = { sse:Infinity }, double = { sse:Infinity }, stretched = { sse:Infinity };
+  for (let i = 0; i < grid.length; i += 1) {
+    const logRate = grid[i];
+    const estimate = profile(exponentials[i]);
+    if (estimate.sse < single.sse) single = { ...estimate, index:i };
+    for (let j = i + 1; j < grid.length; j += 1) {
+      const fit = profile(exponentials[i], exponentials[j]);
+      if (fit.sse < double.sse) double = { ...fit, start:[logRate,grid[j]] };
+    }
+    for (const {beta,powers} of betas) {
+      const fit = profile(shape(rates[i], beta, powers));
+      if (fit.sse < stretched.sse) stretched = { ...fit, start:[logRate,beta] };
+    }
+  }
+  const singleAt = x => {
+    const rate = Math.exp(x);
+    return { ...profile(shape(rate), undefined, true), x, rate, beta:1 };
+  };
+  const around = single.index;
+  single = goldenMinimum(grid[Math.max(0,around - 1)], grid[Math.min(50,around + 1)], singleAt, singleAt(grid[around]));
+  double = simplexMinimum(double.start, [steps[0],steps[0]], [logBounds,logBounds], ([x,z]) => {
+    const rate = Math.exp(Math.min(x,z)), fast = Math.exp(Math.max(x,z));
+    return { ...profile(shape(rate), shape(fast), true), rate, fast, beta:1 };
+  });
+  if (single.sse <= double.sse) double = {...single, b:0, fast:single.rate};
+  stretched = simplexMinimum(stretched.start, steps, [logBounds,betaBounds], ([x,beta]) => {
+    const rate = Math.exp(x);
+    return { ...profile(shape(rate,beta), undefined, true), rate, beta };
+  });
+
+  return [single,double,stretched].map((fit, kind) => {
+    const p = [4,6,5][kind];
     const aicc = n * Math.log(Math.max(1e-24, fit.sse / n)) + 2 * p + (2 * p * (p + 1)) / (n - p - 1);
-    const predict = t => fit.c + fit.a * Math.exp(-Math.pow(t * fit.rate, fit.beta)) +
+    const predict = t => fit.c + fit.a * Math.exp(-((t * fit.rate) ** fit.beta)) +
       (fit.fast ? fit.b * Math.exp(-t * fit.fast) : 0);
     return { ...fit, kind, aicc, predict };
-  }).sort((a, b) => a.aicc - b.aicc);
+  }).sort((a,b) => a.aicc - b.aicc);
 }
 
+const windowDemo = { kind:1, rate:2.33, fast:6.8, mix:0.55, noise:0.006, scale:1.05, base:0.13, duration:40 };
 const examples = [
-  { kind: 0, rate: 2.65, noise: 0.013, scale: 1.1, base: 0.14, duration: 40 },
-  { kind: 1, rate: 1.87, fast: 13.2, mix: 0.60, noise: 0.006, scale: 1.15, base: 0.18, duration: 40 },
-  { kind: 2, rate: 2.35, beta: 0.58, noise: 0.007, scale: 1.14, base: 0.15, duration: 40 },
-  { kind: 1, rate: 2.33, fast: 6.8, mix: 0.55, noise: 0.09, scale: 1.05, base: 0.13, duration: 40 }
+  { kind:0, rate:2.65, noise:0.013, scale:1.1, base:0.14, duration:40 },
+  windowDemo,
+  { kind:2, rate:2.35, beta:0.58, noise:0.007, scale:1.14, base:0.15, duration:40 },
+  { ...windowDemo, noise:0.09 }
 ];
-function sample(index) {
-  return generate(64, examples[index].kind, randomGenerator(84721 + 7919 * index), examples[index]);
+function sample(index, noise = examples[index].noise) {
+  const config = { ...examples[index], noise };
+  const paired = index === 1 || index === 3;
+  return generate(64, config.kind, randomGenerator(paired ? 92621 : 84721 + 7919 * index), config);
 }
 
 function analyze(raw, training) {
@@ -283,91 +432,704 @@ function analyze(raw, training) {
   return { scaled, fits, guess };
 }
 
-const byId = name => document.getElementById(name);
+const fitWarningKeys = ["weak", "close", "boundary", "degenerate"];
+
+function diagnose(result, distanceLimit) {
+  const { fits, guess, scaled } = result;
+  const top = fits[0];
+  const n = scaled.data.length;
+  const mean = scaled.data.reduce((sum, [, y]) => sum + y, 0) / n;
+  const flatSse = scaled.data.reduce((sum, [, y]) => sum + (y - mean) ** 2, 0);
+  const warnings = [];
+  const delta = fits[1].aicc - top.aicc;
+  if (!(top.sse < 0.80 * flatSse)) warnings.push("weak");
+  if (delta < 2) warnings.push("close");
+  const nearBound = (value, bounds) => bounds.some(edge => Math.abs(value - edge) < 1e-5 * Math.max(1, edge));
+  if (nearBound(top.rate,rateBounds) || (top.kind === 1 && nearBound(top.fast,rateBounds)) ||
+    (top.kind === 2 && nearBound(top.beta,betaBounds))) warnings.push("boundary");
+  if (top.kind === 1 && (top.fast / top.rate < 1.15 || Math.min(top.a,top.b) < 0.01 * (top.a + top.b))) {
+    warnings.push("degenerate");
+  }
+  if (guess.top === null) warnings.push("tie");
+  else if (guess.top !== top.kind) warnings.push("disagree");
+  if (guess.distance > distanceLimit) warnings.push("distance");
+  if (guess.top !== null && guess.tally[guess.top] / neighborCount < 0.55) warnings.push("votes");
+  return { warnings, delta, distanceLimit };
+}
+
+// NIST Misra1a pressure and observed volume pairs. Flip the sign at load time.
+function compareWindow(active, full) {
+  return {
+    fitChanged: active.fits[0].kind !== full.fits[0].kind,
+    shapeChanged: active.guess.leaders.join() !== full.guess.leaders.join()
+  };
+}
+
+const misra1aPairs = [
+  [77.6, 10.07], [114.9, 14.73], [141.1, 17.94], [190.8, 23.93],
+  [239.9, 29.61], [289.0, 35.18], [332.8, 40.02], [378.4, 44.82],
+  [434.8, 50.76], [477.3, 55.05], [536.8, 61.01], [593.1, 66.40],
+  [689.1, 75.47], [760.0, 81.78]
+];
+const observedSample = () => misra1aPairs.map(([x, volume]) => [x, -volume]);
+
+/* UI START */
+const strings = {
+  "en": {
+    "local": "In-browser analysis · CSV stays on this device",
+    "title": "How much can one decay curve tell you?",
+    "intro": "Compare three decay models and see how the answer changes as you shorten the observation window.",
+    "examples": "Example data",
+    "sample0": "Single exponential · clear",
+    "sample1": "Double exponential · window demo",
+    "sample2": "Stretched exponential · clear",
+    "sample3": "Same double exponential · high noise",
+    "sample4": "NIST Misra1a · measured adsorption",
+    "import": "Import CSV",
+    "csvHelp": "First column is time or predictor; second column is signal.",
+    "downloadData": "Download selected data",
+    "downloadReport": "Export analysis",
+    "observations": "Observations and fits",
+    "nistLink": "NIST data and reference model",
+    "nistNote": "14 observations. The predictor is pressure and the plotted signal is negative measured volume, so an increasing saturation becomes a declining curve. NIST uses a single-exponential saturation model. Our flexible fits and shape check disagree; the ranking alone cannot establish two physical scales.",
+    "points": "Observations",
+    "leadFit": "Lowest AICc",
+    "otherFits": "Other fits",
+    "residual": "Residuals",
+    "residualHelp": "Observation minus the prediction of the lowest-AICc fit.",
+    "plotAria": "Observed values and fitted curves",
+    "residualAria": "Residuals of the lowest-AICc fit",
+    "compare": "Model comparison",
+    "aligned": "Methods agree in this window: {0}",
+    "caution": "Treat the model choice as uncertain",
+    "weak": "The best fit explains little of the variation relative to a flat signal.",
+    "close": "The top two fits are within 2 AICc points.",
+    "disagree": "AICc and kNN pick different candidates.",
+    "distance": "The nearest simulated shape is farther away than usual in the calibration set.",
+    "votes": "Fewer than 55% of neighbors vote for one model.",
+    "fitLead": "AICc lead",
+    "shapeLead": "kNN lead",
+    "fitRank": "Least-squares fits",
+    "fitRankHelp": "Smaller ΔAICc is better. RMSE uses the original signal units.",
+    "model": "Model",
+    "knn": "Nearest-neighbor shape check",
+    "knnHelp": "Vote shares among the 21 nearest simulated curves.",
+    "benchmark": "Validation and stress tests",
+    "benchmarkIntro": "AICc and kNN were compared on the same curves within each row. All benchmark curves were simulated with balanced labels and independent random seeds.",
+    "scenario": "Test condition",
+    "aiccAccuracy": "AICc accuracy",
+    "knnAccuracy": "kNN accuracy",
+    "coverage": "No-warning rate",
+    "clearAccuracy": "Accuracy without warnings",
+    "reference": "Regular sampling, independent noise",
+    "irregular": "Sparse, irregular sampling",
+    "correlated": "Regular sampling, correlated noise",
+    "coverageHelp": "No-warning rate is the share of trials that pass every warning rule. Accuracy without warnings applies only to that subset. Correlated noise challenges the assumptions of AICc.",
+    "method": "Models and assumptions",
+    "singleFormula": "Single: C + A exp(−x/τ)",
+    "doubleFormula": "Double: C + A₁ exp(−x/τ₁) + A₂ exp(−x/τ₂)",
+    "stretchFormula": "Stretched: C + A exp(−(x/τ)^β)",
+    "training": "The first predictor value is the origin for fitting. Amplitudes are constrained to be nonnegative. kNN compares 20 normalized shape samples against 1,500 simulated curves. Its distance warning uses the 95th percentile of nearest distances in a separate simulation set.",
+    "caveat": "The fits assume approximately independent errors with similar variance. Candidate selection is sensitive to the measurement window, noise and simulation coverage. Window comparison needs observations on both sides of the selected endpoint. Neighbor votes are frequencies, and the NIST example illustrates usage on measured data without establishing accuracy on real decay experiments.",
+    "csvMethod": "CSV format and development disclosure",
+    "csvFormat": "Use two columns separated by commas, tabs, or semicolons. An optional header is time,signal or x,signal. Supply 12–2,000 distinct predictor values. Rows are sorted automatically.",
+    "disclosure": "ChatGPT Codex assisted with the browser interface, numerical fitting, machine-learning implementation and benchmarking.",
+    "synthetic": "Synthetic example",
+    "measured": "Measured reference example",
+    "imported": "Imported CSV",
+    "datapoints": "{0} points",
+    "truth": "Simulated label: {0}",
+    "time": "Time",
+    "pressure": "Pressure",
+    "signal": "Signal",
+    "negativeVolume": "−Volume",
+    "rawX": "Predictor",
+    "names": [
+      "Single exponential",
+      "Double exponential",
+      "Stretched exponential"
+    ],
+    "baseline": "Baseline C",
+    "amplitude": "Amplitude A",
+    "slowAmplitude": "Slow amplitude A₁",
+    "fastAmplitude": "Fast amplitude A₂",
+    "slowTau": "Slow scale τ₁",
+    "fastTau": "Fast scale τ₂",
+    "tau": "Scale τ",
+    "beta": "Stretch exponent β",
+    "neighborVotes": "{0} neighbor votes",
+    "csvCount": "CSV needs 12–2,000 data rows.",
+    "csvNumbers": "Nonempty row {0} must contain two finite numbers.",
+    "duplicateX": "Repeated predictor values found. Merge repeat measurements first.",
+    "invalidSpan": "The predictor span and signal must be finite, and the signal must vary.",
+    "lowVariation": "The signal varies too little to compare decay shapes.",
+    "unresolvedShape": "Resampling did not capture enough signal variation.",
+    "largeCsv": "Choose a two-column CSV smaller than 1 MiB.",
+    "importError": "The CSV could not be read.",
+    "keptData": "The previous analysis is still displayed.",
+    "windowTitle": "Observation window",
+    "windowHelp": "Drag the endpoint or try the early window. The fit uses the selected points and the plot keeps the full uploaded or simulated data visible for context.",
+    "windowEnd": "End of selected data",
+    "windowCount": "{0} of {1} points · ends at {2}",
+    "windowValue": "{0} of {1} points. Endpoint {2}.",
+    "earlyWindow": "Try early window",
+    "fullWindow": "Use full window",
+    "noise": "Simulated noise",
+    "noiseHelp": "Standard deviation as a percentage of the initial amplitude. The simulated curve and random draws stay fixed.",
+    "resetNoise": "Reset noise",
+    "noiseValue": "{0}%",
+    "pending": "Updating the selected fit…",
+    "excluded": "Points outside the fit",
+    "fullReference": "Full-window leads: AICc · {0}. kNN · {1}.",
+    "windowChanged": "At least one leading model changes when the full data are included.",
+    "windowUnavailable": "This window cannot be fit. Move the endpoint later to include more variation.",
+    "windowGraph": "Observed values and fitted curves. Faded points are excluded from the selected fit.",
+    "matchedTitle": "Does the warning policy help at the same coverage?",
+    "matchedHelp": "Within each simulated condition all policies return the same number of results. The AICc-gap baseline takes the largest gaps between its top two fits. The combined policy also uses the shape checks.",
+    "matchedCoverage": "Results / trials",
+    "aiccErrors": "AICc-only errors",
+    "combinedErrors": "Combined errors",
+    "aiccDoubleErrors": "AICc-only double → single",
+    "combinedDoubleErrors": "Combined double → single",
+    "pairedFull": "Paired simulation · full span",
+    "pairedShort": "Paired simulation · first quarter",
+    "matchedScope": "Error denominators are the returned results. For double → single they are the returned true double-exponential cases. The AICc threshold is chosen to match coverage on this test, and the window-comparison warning is evaluated separately.",
+    "fitAblation": "Fit-only applies the weak-fit, near-tie and parameter warnings before matching coverage. Its double-to-single counts are available in the JSON export.",
+    "pairedFinding": "In {0} paired cases with 24 points per window, the AICc lead changed {1} times and the kNN lead changed {2} times. Comparison to the full window flagged {4} of {3} short-window mistakes and {6} of {5} correct results that passed the base warnings.",
+    "boundary": "The leading fit reaches a search bound. Its parameter estimates may depend on that bound.",
+    "degenerate": "The fitted double has nearly equal rates or a component below 1% of the initial amplitude.",
+    "tie": "The shape check has a tie for the most votes.",
+    "tied": "Tie · {0}",
+    "secondFit": "Second by AICc",
+    "thirdFit": "Third by AICc",
+    "extrapolate": "Show extrapolated leading fit",
+    "extrapLegend": "Leading fit extrapolated",
+    "fitOnlyErrors": "Fit-only warnings",
+    "fitBounds": "The search uses dimensionless rates from 0.08 to 70 across the selected predictor span and stretch exponents from 0.35 to 0.95."
+  },
+  "zh": {
+    "local": "浏览器端分析 · CSV 数据留在本机",
+    "title": "一条衰减曲线能告诉我们什么？",
+    "intro": "比较三种衰减模型，观察缩短测量窗口后结果会怎样变化。",
+    "examples": "示例数据",
+    "sample0": "单指数 · 清晰",
+    "sample1": "双指数 · 窗口演示",
+    "sample2": "拉伸指数 · 清晰",
+    "sample3": "同一条双指数 · 高噪声",
+    "sample4": "NIST Misra1a · 实测吸附",
+    "import": "导入 CSV",
+    "csvHelp": "第一列为时间或自变量，第二列为信号。",
+    "downloadData": "下载选中数据",
+    "downloadReport": "导出分析",
+    "observations": "观测与拟合",
+    "nistLink": "NIST 数据与参考模型",
+    "nistNote": "共 14 个观测点。自变量是压力，信号是测得体积的负值，将随压力上升的饱和曲线转换为下降曲线。NIST 使用单指数饱和模型。本工具的拟合排名与形状提示不同，排名本身无法证实存在两个物理尺度。",
+    "points": "观测点",
+    "leadFit": "AICc 最低",
+    "otherFits": "其他拟合",
+    "residual": "残差",
+    "residualHelp": "观测值减去 AICc 最低模型的拟合值。",
+    "plotAria": "观测散点与候选模型拟合曲线",
+    "residualAria": "AICc 最低模型的残差图",
+    "compare": "模型比较",
+    "aligned": "当前窗口内两种方法一致：{0}",
+    "caution": "模型选择仍有不确定性",
+    "weak": "最佳拟合相比水平线只能解释较少的变化。",
+    "close": "最靠前的两个模型相差不足 2 个 AICc 单位。",
+    "disagree": "AICc 和 kNN 首选的模型不同。",
+    "distance": "最近的模拟曲线距离超过校准集中的典型范围。",
+    "votes": "没有模型获得至少 55% 的近邻票数。",
+    "fitLead": "AICc 首选",
+    "shapeLead": "kNN 首选",
+    "fitRank": "最小二乘拟合",
+    "fitRankHelp": "ΔAICc 越小越好，RMSE 与原信号同单位。",
+    "model": "候选模型",
+    "knn": "近邻形状检验",
+    "knnHelp": "来自最接近的 21 条模拟曲线的投票比例。",
+    "benchmark": "验证与压力测试",
+    "benchmarkIntro": "每一行在同一批曲线上同时测试 AICc 和 kNN。样例均为模拟生成，各类别数量相同，测试随机种子独立。",
+    "scenario": "测试条件",
+    "aiccAccuracy": "AICc 准确率",
+    "knnAccuracy": "kNN 准确率",
+    "coverage": "无警告比例",
+    "clearAccuracy": "无警告时的准确率",
+    "reference": "等距采样 · 独立噪声",
+    "irregular": "稀疏不规则采样",
+    "correlated": "等距采样 · 相关噪声",
+    "coverageHelp": "无警告比例指通过全部警告条件的样例占比。最后一列仅统计这些样例。相关噪声会挑战 AICc 的误差假定。",
+    "method": "候选模型与假设",
+    "singleFormula": "单指数：C + A exp(−x/τ)",
+    "doubleFormula": "双指数：C + A₁ exp(−x/τ₁) + A₂ exp(−x/τ₂)",
+    "stretchFormula": "拉伸指数：C + A exp(−(x/τ)^β)",
+    "training": "拟合把首个自变量值作为原点，振幅约束为非负。kNN 以 20 个归一化形状采样点比较 1,500 条模拟曲线。近邻距离的警告阈值取另一批模拟数据的第 95 百分位。",
+    "caveat": "拟合假定误差近似独立、方差相近。测量窗口、噪声和模拟空间会影响模型选择。窗口比较需要截止点前后都有已采集的数据。近邻票数反映频率，NIST 案例展示实测数据用法，实际衰减实验的准确率仍待验证。",
+    "csvMethod": "CSV 格式及开发说明",
+    "csvFormat": "输入两列，用逗号、制表符或分号分隔。首行可为 time,signal 或 x,signal。支持 12–2,000 个互异自变量值，程序会自动排序。",
+    "disclosure": "ChatGPT Codex 辅助了浏览器界面、数值拟合、机器学习实现与验证。",
+    "synthetic": "合成示例",
+    "measured": "实测参考案例",
+    "imported": "导入 CSV",
+    "datapoints": "{0} 个观测点",
+    "truth": "模拟真值：{0}",
+    "time": "时间",
+    "pressure": "压力",
+    "signal": "信号",
+    "negativeVolume": "−体积",
+    "rawX": "自变量",
+    "names": [
+      "单指数",
+      "双指数",
+      "拉伸指数"
+    ],
+    "baseline": "基线 C",
+    "amplitude": "振幅 A",
+    "slowAmplitude": "慢衰减振幅 A₁",
+    "fastAmplitude": "快衰减振幅 A₂",
+    "slowTau": "慢特征尺度 τ₁",
+    "fastTau": "快特征尺度 τ₂",
+    "tau": "特征尺度 τ",
+    "beta": "拉伸指数 β",
+    "neighborVotes": "{0}近邻票数",
+    "csvCount": "CSV 需要 12 至 2,000 行数据。",
+    "csvNumbers": "第 {0} 个非空行须包含两个有限数值。",
+    "duplicateX": "存在重复的自变量值，请先合并重复测量。",
+    "invalidSpan": "自变量跨度和信号需有限，且信号须有变化。",
+    "lowVariation": "信号变化太小，无法比较衰减形状。",
+    "unresolvedShape": "等距重采样未捕捉到足够的信号变化。",
+    "largeCsv": "请选择小于 1 MiB 的两列 CSV。",
+    "importError": "无法读取 CSV。",
+    "keptData": "页面仍显示上一次分析。",
+    "windowTitle": "观测窗口",
+    "windowHelp": "拖动截止点，或试用早段数据。拟合只用选中的观测点，完整的已导入或已模拟数据仍显示在图上。",
+    "windowEnd": "窗口截止点",
+    "windowCount": "{0} / {1} 个点 · 截至 {2}",
+    "windowValue": "共 {1} 个观测点，已选 {0} 个。截止点 {2}。",
+    "earlyWindow": "试用早段数据",
+    "fullWindow": "使用完整窗口",
+    "noise": "模拟噪声",
+    "noiseHelp": "用初始振幅的百分比表示噪声标准差。模拟曲线和随机抽样保持固定。",
+    "resetNoise": "重置噪声",
+    "noiseValue": "{0}%",
+    "pending": "正在更新选中窗口的拟合…",
+    "excluded": "未纳入拟合的观测点",
+    "fullReference": "完整窗口的首选模型为 AICc · {0}，kNN · {1}。",
+    "windowChanged": "加入完整数据后，至少一种方法的首选模型发生变化。",
+    "windowUnavailable": "当前窗口无法拟合。请把截止点后移，纳入变化更明显的数据。",
+    "windowGraph": "观测点与候选模型拟合曲线。浅色点未纳入当前拟合。",
+    "matchedTitle": "给出结论的比例相同时，综合警告有用吗？",
+    "matchedHelp": "每个模拟条件下，各策略给出相同数量的结论。AICc 差值基线选择前两名分差最大的样例。综合策略另外使用近邻形状检查。",
+    "matchedCoverage": "给出结论 / 总数",
+    "aiccErrors": "仅 AICc 的误判",
+    "combinedErrors": "综合方式的误判",
+    "aiccDoubleErrors": "仅 AICc · 双指数判成单指数",
+    "combinedDoubleErrors": "综合方式 · 双指数判成单指数",
+    "pairedFull": "配对模拟 · 完整跨度",
+    "pairedShort": "配对模拟 · 前四分之一",
+    "matchedScope": "总体误判的分母是给出了结论的样例数。双指数判成单指数的分母是其中真值为双指数的数量。仅用 AICc 的阈值在这组测试中按覆盖率匹配，窗口比较警告单独评估。",
+    "fitAblation": "仅拟合策略先应用弱趋势、拟合排名接近和参数警告，再匹配覆盖率。双指数判成单指数的计数亦包含在 JSON 导出中。",
+    "pairedFinding": "在 {0} 组各含 24 个观测点的等点数配对中，AICc 首选改变 {1} 次，kNN 首选改变 {2} 次。与完整窗口比较后，在通过基础警告筛查的结果中，对 {3} 个误判中的 {4} 个发出警告，也对 {5} 个正确结果中的 {6} 个发出警告。",
+    "boundary": "首选拟合触及搜索边界，参数估计可能受该边界影响。",
+    "degenerate": "双指数的两个速率过于接近，或某一分量低于初始振幅的 1%。",
+    "tie": "近邻形状检验出现最高票平票。",
+    "tied": "平票 · {0}",
+    "secondFit": "AICc 第 2 名",
+    "thirdFit": "AICc 第 3 名",
+    "extrapolate": "显示首选拟合的外推",
+    "extrapLegend": "首选拟合外推",
+    "fitOnlyErrors": "仅拟合警告",
+    "fitBounds": "按当前窗口跨度归一化的速率搜索范围为 0.08 至 70，拉伸指数 β 的搜索范围为 0.35 至 0.95。"
+  }
+};
+
+const benchmark = {
+  "trainingCurves": 1500,
+  "calibrationSeed": 417721,
+  "distanceLimit": 0.20940380454304172,
+  "rows": [
+    {
+      "id": "reference",
+      "seed": 964239,
+      "perModel": 120,
+      "samples": 47,
+      "total": 360,
+      "aiccCorrect": 228,
+      "knnCorrect": 283,
+      "clearCount": 137,
+      "clearCorrect": 121
+    },
+    {
+      "id": "irregular",
+      "seed": 164729,
+      "perModel": 80,
+      "samples": 27,
+      "total": 240,
+      "aiccCorrect": 147,
+      "knnCorrect": 180,
+      "clearCount": 118,
+      "clearCorrect": 98
+    },
+    {
+      "id": "correlated",
+      "seed": 708731,
+      "perModel": 80,
+      "samples": 47,
+      "total": 240,
+      "aiccCorrect": 133,
+      "knnCorrect": 172,
+      "clearCount": 77,
+      "clearCorrect": 66
+    }
+  ],
+  "matched": [
+    {
+      "id": "reference",
+      "total": 360,
+      "accepted": 137,
+      "aiccOnly": {
+        "errors": 32,
+        "doubleAsSingle": 18,
+        "doubleAccepted": 46
+      },
+      "fitOnly": {
+        "errors": 30,
+        "doubleAsSingle": 19,
+        "doubleAccepted": 44
+      },
+      "combined": {
+        "errors": 16,
+        "doubleAsSingle": 10,
+        "doubleAccepted": 24
+      }
+    },
+    {
+      "id": "irregular",
+      "total": 240,
+      "accepted": 118,
+      "aiccOnly": {
+        "errors": 26,
+        "doubleAsSingle": 21,
+        "doubleAccepted": 32
+      },
+      "fitOnly": {
+        "errors": 31,
+        "doubleAsSingle": 26,
+        "doubleAccepted": 33
+      },
+      "combined": {
+        "errors": 20,
+        "doubleAsSingle": 14,
+        "doubleAccepted": 21
+      }
+    },
+    {
+      "id": "correlated",
+      "total": 240,
+      "accepted": 77,
+      "aiccOnly": {
+        "errors": 28,
+        "doubleAsSingle": 4,
+        "doubleAccepted": 29
+      },
+      "fitOnly": {
+        "errors": 26,
+        "doubleAsSingle": 10,
+        "doubleAccepted": 20
+      },
+      "combined": {
+        "errors": 11,
+        "doubleAsSingle": 5,
+        "doubleAccepted": 14
+      }
+    },
+    {
+      "id": "pairedFull",
+      "total": 240,
+      "accepted": 100,
+      "aiccOnly": {
+        "errors": 27,
+        "doubleAsSingle": 18,
+        "doubleAccepted": 22
+      },
+      "fitOnly": {
+        "errors": 29,
+        "doubleAsSingle": 19,
+        "doubleAccepted": 22
+      },
+      "combined": {
+        "errors": 20,
+        "doubleAsSingle": 8,
+        "doubleAccepted": 10
+      }
+    },
+    {
+      "id": "pairedShort",
+      "total": 240,
+      "accepted": 112,
+      "aiccOnly": {
+        "errors": 54,
+        "doubleAsSingle": 40,
+        "doubleAccepted": 41
+      },
+      "fitOnly": {
+        "errors": 63,
+        "doubleAsSingle": 44,
+        "doubleAccepted": 44
+      },
+      "combined": {
+        "errors": 65,
+        "doubleAsSingle": 55,
+        "doubleAccepted": 55
+      }
+    }
+  ],
+  "pairedWindow": {
+    "seed": 713043,
+    "perModel": 80,
+    "samples": 24,
+    "shortFraction": 0.25,
+    "fitFlips": 59,
+    "shapeFlips": 107,
+    "shortMistakesWithoutWarnings": 65,
+    "flaggedByComparison": 55,
+    "shortCorrect": 47,
+    "flaggedCorrect": 2
+  },
+  "observed": {
+    "reference": "single",
+    "aiccLead": "double",
+    "knnLead": "single",
+    "points": 14,
+    "deltaAicc": 9.280256984114459,
+    "warnings": [
+      "disagree"
+    ]
+  }
+};
+const byId = id => document.getElementById(id);
 const textElement = (tag, value) => {
   const element = document.createElement(tag);
   element.textContent = value;
   return element;
 };
-const formatter = new Intl.NumberFormat("zh-CN", { maximumSignificantDigits: 4, useGrouping: false });
+let locale = "en";
+let formatter;
+const tr = (key, ...values) => strings[locale][key].replace(/\{(\d+)\}/g, (_, i) => values[i]);
+const modelName = kind => strings[locale].names[kind];
+const shapeName = guess => guess.top === null
+  ? tr("tied",guess.leaders.map(modelName).join(" / ")) : modelName(guess.top);
 const format = x => x === 0 ? "0" :
   Math.abs(x) >= 1e5 || Math.abs(x) < 0.001 ? x.toExponential(2) : formatter.format(x);
 const cleanNumber = x => Number(x.toPrecision(12));
-const modelName = kind => models[kind].name;
+const percent = (value, count) => count ? (100 * value / count).toFixed(1) + "%" : "—";
 
 const training = makeTraining();
-const validation = validateTraining(training);
-const rates = validation.matrix.map((row, kind) => modelName(kind) + " " +
-  Math.round(100 * row[kind] / validationSize) + "%").join("，");
-byId("validation").textContent = "分类器在浏览器中用 1,500 条模拟曲线建立近邻索引，再用独立随机种子的 360 条模拟曲线验证。整体准确率 " +
-  (100 * validation.correct / validation.total).toFixed(1) + "%，各类召回率为" + rates +
-  "。曲线经等距重采样和归一化后，在 21 条最近样本中投票。";
-
 let current;
+let dataset;
+let requestedCount;
+let requestedNoise;
+let pendingFit = null;
+let lastError = null;
 
-function setData(raw, title, source, truth = null) {
-  const result = analyze(raw, training);
-  current = { ...result, raw, title, source, truth };
-  const { fits, guess, scaled } = current;
-  const top = fits[0];
-  const voteLead = guess.tally[guess.top] / neighborCount;
-  const trainingMismatch = guess.distance > validation.threshold;
-  const average = scaled.data.reduce((sum, [, y]) => sum + y, 0) / raw.length;
-  const flatSse = scaled.data.reduce((sum, [, y]) => sum + (y - average) ** 2, 0);
-  const hasTrend = top.sse < 0.80 * flatSse;
-  const uncertain = fits[1].aicc - top.aicc < 2 || !hasTrend || trainingMismatch ||
-    guess.top !== top.kind || voteLead < 0.55;
-  const verdict = byId("verdict");
-  verdict.dataset.caution = uncertain;
-  let explanation = modelName(top.kind) + "的 AICc 最低，且与形状提示一致。";
-  if (voteLead < 0.55) explanation = "近邻投票分散，建议结合残差和实验条件判断。";
-  if (guess.top !== top.kind) explanation = "拟合与形状提示不同，先保留备选模型。";
-  if (trainingMismatch) explanation = "曲线形状偏离模拟训练范围，近邻提示仅供参考。";
-  if (fits[1].aicc - top.aicc < 2) {
-    explanation = modelName(top.kind) + "与" + modelName(fits[1].kind) + "的 ΔAICc 不足 2，现有数据难以区分。";
-  }
-  if (!hasTrend) explanation = "数据支持的下降趋势较弱，暂不建议选择衰减模型。";
-  verdict.textContent = explanation;
-  byId("dataset").textContent = title + " · " + raw.length + " 个点 · " + source +
-    (truth === null ? "" : " · 模拟真值 " + modelName(truth));
-
-  const signalScale = scaled.signalSpan * scaled.divisor;
-  const rows = fits.map(fit => {
-    const row = document.createElement("tr");
-    const name = textElement("th", modelName(fit.kind));
-    name.scope = "row";
-    row.append(name, textElement("td", (fit.aicc - top.aicc).toFixed(2)),
-      textElement("td", format(fitRmse(fit, current))));
-    return row;
+function row(values, useHeading = false) {
+  const cells = values.map((value, index) => {
+    const heading = useHeading && index === 0;
+    const cell = textElement(heading ? "th" : "td", value);
+    if (heading) cell.scope = "row";
+    return cell;
   });
-  byId("fits").replaceChildren(...rows);
+  const item = document.createElement("tr");
+  item.append(...cells);
+  return item;
+}
 
-  const params = [["基线 C", scaled.divisor * (scaled.low + top.c * scaled.signalSpan)]];
-  if (top.kind === 1) {
-    params.push(["慢衰减振幅 A₁", top.a * signalScale], ["慢时间常数 τ₁", scaled.duration / top.rate],
-      ["快衰减振幅 A₂", top.b * signalScale], ["快时间常数 τ₂", scaled.duration / top.fast]);
-  } else {
-    params.push(["振幅 A", top.a * signalScale], ["时间常数 τ", scaled.duration / top.rate]);
-    if (top.kind === 2) params.push(["拉伸指数 β", top.beta]);
-  }
-  byId("params").replaceChildren(...params.map(([name, value]) => {
+function pairs(target, entries) {
+  byId(target).replaceChildren(...entries.map(([key, value]) => {
     const group = document.createElement("div");
-    group.append(textElement("dt", name), textElement("dd", format(value)));
+    group.append(textElement("dt", key), textElement("dd", value));
     return group;
   }));
+}
+
+function setLocale(next) {
+  locale = next;
+  document.documentElement.lang = locale === "en" ? "en" : "zh-CN";
+  document.title = "Decay Lab · " + tr("title");
+  formatter = new Intl.NumberFormat(document.documentElement.lang, {maximumSignificantDigits:4,useGrouping:false});
+  for (const el of document.querySelectorAll("[data-i18n]")) el.textContent = tr(el.dataset.i18n);
+  byId("language").textContent = locale === "en" ? "中文" : "English";
+  byId("language").setAttribute("aria-label", locale === "en" ? "Switch to Chinese" : "切换为英语");
+  byId("plot").setAttribute("aria-label", tr("plotAria"));
+  byId("residual").setAttribute("aria-label", tr("residualAria"));
+  byId("benchmark-rows").replaceChildren(...benchmark.rows.map(item => row([
+    tr(item.id), item.total, percent(item.aiccCorrect,item.total), percent(item.knnCorrect,item.total),
+    percent(item.clearCount,item.total), percent(item.clearCorrect,item.clearCount)
+  ], true)));
+  byId("matched-rows").replaceChildren(...benchmark.matched.map(item => row([
+    tr(item.id), item.accepted + " / " + item.total,
+    item.aiccOnly.errors + " / " + item.accepted, item.fitOnly.errors + " / " + item.accepted, item.combined.errors + " / " + item.accepted,
+    item.aiccOnly.doubleAsSingle + " / " + item.aiccOnly.doubleAccepted,
+    item.combined.doubleAsSingle + " / " + item.combined.doubleAccepted
+  ], true)));
+  byId("ablation-note").textContent = tr("fitAblation");
+  const paired = benchmark.pairedWindow;
+  byId("paired-finding").textContent = tr("pairedFinding", 3 * paired.perModel, paired.fitFlips,
+    paired.shapeFlips, paired.shortMistakesWithoutWarnings, paired.flaggedByComparison, paired.shortCorrect, paired.flaggedCorrect);
+  if (dataset) renderData();
+  if (lastError) showError(lastError);
+}
+
+function displayTitle(meta) {
+  return meta.example === undefined ? meta.fileName : tr("sample" + meta.example);
+}
+
+function showError(error) {
+  lastError = error;
+  const message = strings[locale][error.message] ? tr(error.message, error.detail) : tr("importError");
+  byId("error").textContent = message + " " + tr("keptData");
+}
+
+function evaluateRows(raw) {
+  const result = analyze(raw, training);
+  return { ...result, raw, diagnostic:diagnose(result, benchmark.distanceLimit) };
+}
+
+function setData(raw, meta, noise = null) {
+  const full = evaluateRows(raw);
+  clearTimeout(pendingFit);
+  pendingFit = null;
+  dataset = { full, meta, noise, count:raw.length };
+  requestedCount = raw.length;
+  requestedNoise = noise;
+  current = full;
+  lastError = null;
+  byId("error").textContent = "";
+  renderData();
+}
+
+function earlyCount() {
+  return Math.max(12, Math.round(dataset.full.raw.length / 4));
+}
+
+function renderControls() {
+  const raw = dataset.full.raw;
+  const slider = byId("window-end");
+  slider.max = raw.length;
+  slider.value = requestedCount;
+  slider.disabled = raw.length <= 12;
+  const endpoint = format(raw[requestedCount - 1][0]);
+  slider.setAttribute("aria-valuetext", tr("windowValue", requestedCount, raw.length, endpoint));
+  byId("window-count").value = tr("windowCount", requestedCount, raw.length, endpoint);
+  byId("window-early").disabled = requestedCount === earlyCount();
+  byId("window-full").disabled = requestedCount === raw.length;
+  byId("noise-control").hidden = requestedNoise === null;
+  if (requestedNoise !== null) {
+    byId("noise").value = requestedNoise;
+    byId("noise").setAttribute("aria-valuetext", tr("noiseValue", format(requestedNoise)));
+    byId("noise-value").value = tr("noiseValue", format(requestedNoise));
+    byId("noise-reset").disabled = requestedNoise === Math.round(examples[dataset.meta.example].noise * 1000) / 10;
+  }
+  byId("export").disabled = !current || pendingFit !== null;
+  byId("raw").disabled = pendingFit !== null;
+  byId("window-pending").textContent = pendingFit === null ? "" : tr("pending");
+}
+
+function applyWindow() {
+  pendingFit = null;
+  const { meta, full } = dataset;
+  if (dataset.noise !== requestedNoise) {
+    const updated = evaluateRows(sample(meta.example, requestedNoise / 100));
+    dataset = { ...dataset, full:updated, noise:requestedNoise };
+  }
+  dataset.count = requestedCount;
+  if (dataset.count === dataset.full.raw.length) {
+    current = dataset.full;
+  } else {
+    const prefix = dataset.full.raw.slice(0, dataset.count);
+    try {
+      const result = evaluateRows(prefix);
+      const comparison = compareWindow(result, dataset.full);
+      if (comparison.fitChanged || comparison.shapeChanged) result.diagnostic.warnings.push("windowChanged");
+      current = { ...result, comparison };
+    } catch (error) {
+      if (!["invalidSpan", "lowVariation", "unresolvedShape"].includes(error.message)) throw error;
+      current = null;
+    }
+  }
+  renderData();
+}
+
+function requestWindow(count, noise = requestedNoise, debounce = false) {
+  requestedCount = count;
+  requestedNoise = noise;
+  clearTimeout(pendingFit);
+  if (debounce) {
+    pendingFit = setTimeout(applyWindow, 75);
+    renderControls();
+  } else {
+    applyWindow();
+  }
+}
+
+function renderData() {
+  const { full, meta, count } = dataset;
+  const partial = count < full.raw.length;
+  renderControls();
+  byId("excluded").hidden = !partial;
+  byId("extrap-choice").hidden = !partial || !current;
+  byId("plot").setAttribute("aria-label", tr(partial ? "windowGraph" : "plotAria"));
+  byId("window-summary").textContent = partial
+    ? tr("fullReference", modelName(full.fits[0].kind), shapeName(full.guess)) : "";
+  byId("dataset").textContent = [
+    displayTitle(meta), tr("datapoints", count), tr(meta.source),
+    meta.truth === undefined ? "" : tr("truth", modelName(meta.truth))
+  ].filter(Boolean).join(" · ");
+  byId("case-note").hidden = meta.source !== "measured";
+  byId("case-desc").textContent = tr("nistNote");
+  byId("signal-axis").textContent = tr(meta.y || "signal");
+  byId("predictor-axis").textContent = tr(meta.x || "time");
+  if (!current) {
+    byId("verdict").dataset.caution = "true";
+    byId("verdict-title").textContent = tr("windowUnavailable");
+    byId("warnings").hidden = true;
+    for (const id of ["warnings", "leaders", "fits", "params", "votes"]) byId(id).replaceChildren();
+    drawCharts();
+    return;
+  }
+  const { fits, guess, scaled, diagnostic } = current;
+  const top = fits[0];
+  const hasWarnings = diagnostic.warnings.length > 0;
+  byId("verdict").dataset.caution = String(hasWarnings);
+  byId("verdict-title").textContent = hasWarnings ? tr("caution") : tr("aligned",modelName(top.kind));
+  byId("warnings").hidden = !hasWarnings;
+  byId("warnings").replaceChildren(...diagnostic.warnings.map(key => textElement("li",tr(key))));
+  pairs("leaders", [[tr("fitLead"), modelName(top.kind)], [tr("shapeLead"), shapeName(guess)]]);
+
+  const signalScale = scaled.signalSpan * scaled.divisor;
+  byId("fits").replaceChildren(...fits.map(fit => row([
+    modelName(fit.kind), (fit.aicc - top.aicc).toFixed(2), format(fitRmse(fit, current))
+  ], true)));
+
+  const params = [["baseline", scaled.divisor * (scaled.low + top.c * scaled.signalSpan)]];
+  if (top.kind === 1) {
+    params.push(["slowAmplitude", top.a * signalScale], ["slowTau", scaled.duration / top.rate],
+      ["fastAmplitude", top.b * signalScale], ["fastTau", scaled.duration / top.fast]);
+  } else {
+    params.push(["amplitude", top.a * signalScale], ["tau", scaled.duration / top.rate]);
+    if (top.kind === 2) params.push(["beta", top.beta]);
+  }
+  pairs("params", params.map(([key,value]) => [tr(key),format(value)]));
 
   byId("votes").replaceChildren(...guess.tally.map((votes, kind) => {
     const vote = document.createElement("div");
     vote.className = "vote";
     const meter = document.createElement("meter");
-    meter.setAttribute("aria-label", modelName(kind) + "近邻票数");
+    meter.setAttribute("aria-label", tr("neighborVotes",modelName(kind)));
     meter.max = neighborCount;
     meter.value = votes;
-    vote.append(textElement("span", modelName(kind)), meter,
+    vote.append(textElement("span",modelName(kind)), meter,
       textElement("strong", Math.round(100 * votes / neighborCount) + "%"));
     return vote;
   }));
-  byId("error").textContent = "";
   drawCharts();
 }
 
@@ -377,33 +1139,53 @@ function fitRmse(fit, result) {
 }
 
 function drawCharts() {
-  if (!current) return;
-  const { scaled, fits, raw } = current;
-  const top = fits[0];
-  const timeLabel = t => format(raw[0][0] + scaled.duration * t);
-  const signalLabel = y => format(scaled.divisor * (scaled.low + scaled.signalSpan * y));
-  const signalScale = scaled.divisor * scaled.signalSpan;
-  const count = 160;
-  const series = fits.map(fit => Array.from({ length: count + 1 }, (_, i) => {
-    const x = i / count;
-    return [x, fit.predict(x)];
-  }));
-  const ymin = Math.min(0, ...series.flat().map(point => point[1]));
-  const ymax = Math.max(1, ...series.flat().map(point => point[1]));
+  if (!dataset) return;
+  const { full, count } = dataset;
+  const whole = full.scaled;
+  const origin = full.raw[0][0];
+  const timeLabel = t => format(origin + whole.duration * t);
+  const signalLabel = y => format(whole.divisor * (whole.low + whole.signalSpan * y));
+  const cutoff = whole.data[count - 1][0];
+  function height(fit, t) {
+    const part = current.scaled;
+    const signal = (part.divisor / whole.divisor) * (part.low + part.signalSpan * fit.predict(t));
+    return (signal - whole.low) / whole.signalSpan;
+  }
+  const series = current ? current.fits.map(fit => Array.from({length:161}, (_, i) => [
+    i * cutoff / 160, height(fit,i / 160)
+  ])) : [];
+  const stretch = current && cutoff < 1 && byId("extrapolate").checked
+    ? Array.from({length:121}, (_,i) => {
+        const x = cutoff + (1 - cutoff) * i / 120;
+        return [x,height(current.fits[0],x / cutoff)];
+      })
+    : [];
+  byId("extrap-legend").hidden = stretch.length === 0;
+  const fittedHeights = series.flat().map(([, y]) => y);
+  const low = Math.min(0, ...fittedHeights) - 0.05;
+  const high = Math.max(1, ...fittedHeights) + 0.05;
+  const residuals = current ? current.scaled.data.map(([x, y]) => [
+    x * cutoff, y - current.fits[0].predict(x)
+  ]) : [];
+  const abs = Math.max(0.007, ...residuals.map(([, y]) => Math.abs(y))) * 1.14;
+  const rLabel = r => format(r * current.scaled.divisor * current.scaled.signalSpan);
+  const labels = [signalLabel(low),signalLabel(high),...(current ? [rLabel(-abs),rLabel(abs)] : [])];
+  const margin = Math.max(49, ...labels.map(label => 7 * label.length + 12));
   chart(byId("plot"), {
-    low: ymin - 0.05, high: ymax + 0.05, xLabel: timeLabel, yLabel: signalLabel, yticks: 5,
-    curves: series, dots: scaled.data, residual: false
+    low, high, xLabel:timeLabel, yLabel:signalLabel, yticks:5, margin,
+    curves:series, dots:whole.data.slice(0, count), excluded:whole.data.slice(count), cutoff, stretch
   });
-  const residuals = scaled.data.map(([x, y]) => [x, y - top.predict(x)]);
-  const abs = Math.max(0.007, ...residuals.map(point => Math.abs(point[1]))) * 1.14;
-  chart(byId("residual"), {
-    low: -abs, high: abs, xLabel: timeLabel, yLabel: r => format(r * signalScale), yticks: 2,
-    curves: [], dots: residuals, residual: true
+  const residualCanvas = byId("residual");
+  residualCanvas.hidden = !current;
+  if (!current) return;
+  chart(residualCanvas, {
+    low:-abs, high:abs, xLabel:timeLabel, yLabel:rLabel, yticks:2, margin,
+    curves:[], dots:residuals, residual:true, cutoff
   });
 }
 
 function chart(canvas, config) {
-  const { low, high, xLabel, yLabel, yticks, curves, dots, residual } = config;
+  const { low, high, xLabel, yLabel, yticks, curves, dots, residual, margin, excluded = [], cutoff = 1, stretch = [] } = config;
   const bounds = canvas.getBoundingClientRect();
   if (bounds.width < 100) return;
   const ratio = Math.min(2, window.devicePixelRatio || 1);
@@ -412,12 +1194,22 @@ function chart(canvas, config) {
   const ctx = canvas.getContext("2d");
   ctx.scale(ratio, ratio);
   ctx.font = "11px ui-monospace, monospace";
-  const axisLeft = Math.max(49, ctx.measureText(yLabel(low)).width + 12,
-    ctx.measureText(yLabel(high)).width + 12);
+  const axisLeft = margin;
   const axisRight = bounds.width - Math.max(23, ctx.measureText(xLabel(1)).width / 2 + 3);
   const axisTop = 10, axisBottom = bounds.height - 24;
   const x = t => axisLeft + t * (axisRight - axisLeft);
   const y = v => axisBottom - (v - low) / (high - low) * (axisBottom - axisTop);
+  if (cutoff < 1) {
+    ctx.fillStyle = "#f0f2ef";
+    ctx.fillRect(x(cutoff), axisTop, axisRight - x(cutoff), axisBottom - axisTop);
+    ctx.strokeStyle = "#90a299";
+    ctx.setLineDash([4, 4]);
+    ctx.beginPath();
+    ctx.moveTo(x(cutoff), axisTop);
+    ctx.lineTo(x(cutoff), axisBottom);
+    ctx.stroke();
+    ctx.setLineDash([]);
+  }
   ctx.lineWidth = 1;
   ctx.strokeStyle = "#dce5df";
   ctx.fillStyle = "#4d6460";
@@ -444,23 +1236,33 @@ function chart(canvas, config) {
     ctx.lineTo(axisRight, y(0));
     ctx.stroke();
   }
-  ctx.fillStyle = "rgba(67,83,83,0.67)";
-  for (const [t, datum] of dots) {
-    ctx.beginPath();
-    ctx.arc(x(t), y(datum), dots.length > 400 ? 1.2 : 2.25, 0, Math.PI * 2);
-    ctx.fill();
+  function plotDots(points, color) {
+    ctx.fillStyle = color;
+    for (const [t, datum] of points) {
+      ctx.beginPath();
+      ctx.arc(x(t), y(datum), points.length > 400 ? 1.2 : 2.25, 0, Math.PI * 2);
+      ctx.fill();
+    }
   }
-  for (let i = curves.length - 1; i >= 0; i -= 1) {
-    ctx.strokeStyle = ["#146853", "#a26138", "#797992"][i];
-    ctx.lineWidth = i ? 1.35 : 2.3;
-    ctx.setLineDash(i ? [i === 1 ? 4 : 9, 4] : []);
+  plotDots(excluded, "#b4bfba");
+  plotDots(dots, "rgba(67,83,83,0.67)");
+  function line(points, color, width, dash) {
+    ctx.strokeStyle = color;
+    ctx.lineWidth = width;
+    ctx.setLineDash(dash);
     ctx.beginPath();
-    curves[i].forEach(([t, v], idx) => {
-      if (idx === 0) ctx.moveTo(x(t), y(v));
-      else ctx.lineTo(x(t), y(v));
-    });
+    points.forEach(([t,v], i) => i === 0 ? ctx.moveTo(x(t),y(v)) : ctx.lineTo(x(t),y(v)));
     ctx.stroke();
   }
+  ctx.save();
+  ctx.beginPath();
+  ctx.rect(axisLeft,axisTop,axisRight-axisLeft,axisBottom-axisTop);
+  ctx.clip();
+  line(stretch, "#528c79", 1.9, [6,5]);
+  for (let i = curves.length - 1; i >= 0; i -= 1) {
+    line(curves[i], ["#146853","#a26138","#797992"][i], i ? 1.35 : 2.3, i ? [i === 1 ? 4 : 9,4] : []);
+  }
+  ctx.restore();
 }
 
 function download(filename, content, mime) {
@@ -473,45 +1275,78 @@ function download(filename, content, mime) {
 }
 
 function loadExample(index) {
-  const title = byId("sample").options[index].text;
-  setData(sample(index), title, "合成示例", examples[index].kind);
+  if (index === 4) {
+    setData(observedSample(), {example:index,source:"measured",x:"pressure",y:"negativeVolume"});
+    return;
+  }
+  setData(sample(index), {example:index,source:"synthetic",truth:examples[index].kind},
+    Math.round(examples[index].noise * 1000) / 10);
 }
-const samples = byId("sample");
-samples.addEventListener("input", () => loadExample(Number(samples.value)));
 
+const samples = byId("sample");
 let importGeneration = 0;
-samples.addEventListener("input", () => { importGeneration += 1; });
+samples.addEventListener("input", () => {
+  importGeneration += 1;
+  loadExample(Number(samples.value));
+});
+
 byId("file").addEventListener("change", async event => {
   const file = event.target.files[0];
   if (!file) return;
   const generation = ++importGeneration;
   try {
-    if (file.size > 1024 * 1024) throw Error("文件超过 1 MiB，请导入只含两列数值的 CSV。");
+    if (file.size > 1024 * 1024) throw Error("largeCsv");
     const csv = await file.text();
     if (generation !== importGeneration) return;
-    setData(parseCsv(csv), file.name, "导入 CSV");
+    const x = /^\s*"?x"?\s*[,;\t]/i.test(csv) ? "rawX" : "time";
+    setData(parseCsv(csv), {fileName:file.name,source:"imported",x});
     samples.selectedIndex = -1;
   } catch (error) {
-    if (generation === importGeneration) {
-      byId("error").textContent = error.message + " 页面仍显示上一次分析。";
-    }
+    if (generation === importGeneration) showError(error);
   } finally {
-    event.target.value = "";
+    if (generation === importGeneration || !event.target.files.length || event.target.files[0] === file) {
+      event.target.value = "";
+    }
   }
 });
 
+byId("window-end").addEventListener("input", event => requestWindow(Number(event.target.value), requestedNoise, true));
+byId("noise").addEventListener("input", event => requestWindow(requestedCount, Number(event.target.value), true));
+byId("window-early").addEventListener("click", () => requestWindow(earlyCount()));
+byId("window-full").addEventListener("click", () => requestWindow(dataset.full.raw.length));
+byId("noise-reset").addEventListener("click", () =>
+  requestWindow(requestedCount, Math.round(examples[dataset.meta.example].noise * 1000) / 10));
+
+byId("language").addEventListener("click", () => setLocale(locale === "en" ? "zh" : "en"));
+
+byId("extrapolate").addEventListener("change",drawCharts);
+
 byId("raw").addEventListener("click", () => {
-  const csv = "time,signal\n" + current.raw.map(row => row.join(",")).join("\n") + "\n";
+  const {meta, full, count} = dataset;
+  const predictor = meta.x && meta.x !== "time" ? "x" : "time";
+  const csv = predictor + ",signal\n" + full.raw.slice(0, count).map(values => values.join(",")).join("\n") + "\n";
   download("decay-data.csv", csv, "text/csv;charset=utf-8");
 });
 
 byId("export").addEventListener("click", () => {
-  const { fits, guess, scaled, raw, title, source, truth } = current;
+  const {fits,guess,scaled,raw,diagnostic} = current;
+  const {meta} = dataset;
   const scale = scaled.signalSpan * scaled.divisor;
   const result = {
-    dataset: title, source, samples: raw.length, exampleGroundTruth: truth === null ? null : models[truth].key,
-    timeOrigin: raw[0][0],
-    verdict: byId("verdict").textContent,
+    dataset:displayTitle(meta), source:meta.source, samples:raw.length, language:locale,
+    predictor:meta.x || "time", signal:meta.y || "signal", predictorOrigin:raw[0][0],
+    ...(!meta.x || meta.x === "time" ? {timeOrigin:raw[0][0]} : {}),
+    ...(meta.source === "measured" ? {reference:"https://www.itl.nist.gov/div898/strd/nls/data/misra1a.shtml"} : {}),
+    exampleGroundTruth:meta.truth === undefined ? null : models[meta.truth].key,
+    observationWindow: {
+      included:raw.length, available:dataset.full.raw.length,
+      start:raw[0][0], end:raw.at(-1)[0], fullEnd:dataset.full.raw.at(-1)[0],
+      fullAiccLead:models[dataset.full.fits[0].kind].key, fullKnnLead:models[dataset.full.guess.top]?.key ?? null,
+      ...(current.comparison || {fitChanged:false, shapeChanged:false})
+    },
+    ...(dataset.noise === null ? {} : {simulation:{noiseStandardDeviationFraction:dataset.noise / 100}}),
+    verdict:byId("verdict-title").textContent, warnings:diagnostic.warnings,
+    distanceToNearest:guess.distance, distanceWarningThreshold:diagnostic.distanceLimit,
     fits: fits.map(fit => ({
       model: models[fit.kind].key,
       deltaAicc: cleanNumber(fit.aicc - fits[0].aicc),
@@ -522,13 +1357,16 @@ byId("export").addEventListener("click", () => {
       ...(fit.kind === 1 && { amplitudeFast: cleanNumber(fit.b * scale), tauFast: cleanNumber(scaled.duration / fit.fast) }),
       ...(fit.kind === 2 && { beta: cleanNumber(fit.beta) })
     })),
+    knnLeaders:guess.leaders.map(kind => models[kind].key),
     neighbors: models.map(({ key }, i) => ({ model: key, votes: guess.tally[i], total: neighborCount })),
-    syntheticValidation: { confusionMatrix: validation.matrix, correct: validation.correct, total: validation.total }
+    syntheticBenchmark:benchmark
   };
   download("decay-analysis.json", JSON.stringify(result, null, 2) + "\n", "application/json");
 });
 
 new ResizeObserver(drawCharts).observe(byId("plot"));
-loadExample(0);
+setLocale("en");
+samples.value = "1";
+loadExample(1);
 </script>
 </body></html>
