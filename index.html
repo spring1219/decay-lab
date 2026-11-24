@@ -1,0 +1,534 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>Decay Lab · 衰减曲线实验室</title>
+<style>
+:root{--ink:#162a2a;--muted:#4d6460;--shell:#eef2ec;--paper:#fcfdf9;--line:#d9e2db;--brand:#1b5349;--accent:#257869;--highlight:#e4efe6;--warn:#874818;--warnbg:#faefdd;--mono:ui-monospace,"IBM Plex Mono",monospace}
+*{box-sizing:border-box}body{margin:0;background:var(--shell);color:var(--ink);font:15px/1.65 system-ui,"Noto Sans SC",sans-serif}button,select{font:inherit}button,select,.file-button{min-height:42px;border:1px solid #b8c9bd;border-radius:7px;background:var(--paper);padding:7px 12px;color:var(--ink)}button,.file-button{cursor:pointer}button:hover,.file-button:hover{border-color:var(--accent);background:#eaf3ec}button:focus-visible,select:focus-visible,summary:focus-visible,.file-button:focus-within{outline:3px solid #287f70;outline-offset:2px}a{color:var(--brand)}code{font-family:var(--mono)}main{max-width:1180px;margin:auto;padding:0 5vw 44px}.mast{padding:23px 0 15px;border-bottom:1px solid #cdd9d0;display:flex;justify-content:space-between;gap:12px;align-items:center}.mark{font-weight:800;font-family:var(--mono);letter-spacing:-.04em;font-size:19px;display:flex;align-items:center;gap:10px}.mark i{width:12px;height:12px;border-radius:2px;background:var(--brand);display:inline-block;transform:rotate(-12deg)}.mast small{color:var(--muted)}header{padding:39px 0 26px}h1{font-size:clamp(33px,5vw,58px);font-weight:770;margin:0;line-height:1.14;letter-spacing:-.055em}header p{font-size:16px;color:var(--muted);margin:11px 0 0}.toolbar{display:flex;align-items:end;gap:10px;flex-wrap:wrap;margin-bottom:18px}.field{display:grid;gap:4px}.field label{color:var(--muted);font-size:12px}.file-button{background:var(--brand);color:#fff;border-color:var(--brand);display:inline-flex;align-items:center;position:relative}.file-button:hover{background:#286a5d}.file-button input{position:absolute;width:1px;height:1px;opacity:0}.push{margin-left:auto}.msg{margin:0 0 15px;color:#7e2e26;font-weight:650}.msg:empty{display:none}.grid{display:grid;grid-template-columns:minmax(0,1.95fr) minmax(285px,1fr);gap:16px}.card{min-width:0;background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:18px}.card h2{font-size:16px;margin:0;font-weight:760;line-height:1.4}.sub{font-size:12px;color:var(--muted);margin:3px 0 9px;overflow-wrap:anywhere}.legend{display:flex;gap:18px;flex-wrap:wrap;margin:9px 0 0;color:var(--muted);font-size:12px}.legend span::before{content:"";display:inline-block;width:12px;height:3px;background:var(--brand);vertical-align:middle;margin-right:6px}.legend .dots::before{height:5px;width:5px;border-radius:50%;background:#57666a}.legend .other::before{height:0;border-top:2px dashed #97623d;background:none}canvas{display:block;width:100%;height:290px}canvas#residual{height:105px}.card hr{border:0;border-top:1px solid var(--line);margin:8px 0}.verdict{margin:12px 0 16px;padding:11px 12px;background:var(--highlight);color:var(--brand);border-radius:6px;font-weight:650}.verdict[data-caution="true"]{background:var(--warnbg);color:var(--warn)}.result-block + .result-block{margin-top:20px}.table-wrap{overflow-x:auto}table{border-collapse:collapse;width:100%;font-size:13px}th,td{padding:7px 3px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}th:first-child,td:first-child{text-align:left}th{font-size:11px;color:var(--muted)}td:not(:first-child){font-family:var(--mono);font-variant-numeric:tabular-nums}.votes{display:grid;gap:6px;margin:8px 0}.vote{display:grid;grid-template-columns:5em 1fr 4ch;gap:8px;align-items:center;font-size:12px}.vote strong{text-align:right;font-family:var(--mono)}meter{width:100%;height:12px;accent-color:var(--accent)}.notes{margin-top:16px}.notes+ .notes{margin-top:9px}summary{color:var(--brand);font-weight:700;cursor:pointer}.notes p,.notes li{color:var(--muted);font-size:14px}.notes p:last-child{margin-bottom:0}.params{display:grid;gap:4px;font-size:13px;margin:8px 0 0}.params div{display:flex;justify-content:space-between;gap:8px}.params dt{color:var(--muted)}.params dd{margin:0;font-family:var(--mono);text-align:right}.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}@media(max-width:880px){.grid{grid-template-columns:1fr}.push{margin-left:0}.card{padding:15px}}@media(max-width:450px){main{padding-inline:12px}header{padding-top:25px}.mast small{display:none}canvas{height:235px}}
+</style>
+</head>
+<body>
+<main>
+<div class="mast"><span class="mark"><i aria-hidden="true"></i>Decay Lab</span><small>浏览器端计算 · 数据留在本机</small></div>
+<header><h1>衰减曲线实验室</h1><p>给一条衰减曲线，比一比三种模型，看看数据能把它们区分到什么程度。</p></header>
+<div class="toolbar">
+<div class="field"><label for="sample">示例数据</label><select id="sample"><option value="0">单指数 · 清晰</option><option value="1">双指数 · 清晰</option><option value="2">拉伸指数 · 清晰</option><option value="3">双指数 · 高噪声</option></select></div>
+<label class="file-button"><span>导入 CSV</span><input id="file" type="file" accept=".csv,.txt,text/csv" aria-describedby="csvhelp"></label>
+<span class="sr" id="csvhelp">第一列为时间，第二列为信号，首行可为 time,signal。</span>
+<button class="push" type="button" id="raw">下载当前数据</button>
+<button type="button" id="export">下载分析结果</button>
+</div>
+<p id="error" class="msg" role="alert"></p>
+<div class="grid">
+<section class="card">
+<h2>观测与拟合</h2><p class="sub" id="dataset"></p>
+<canvas id="plot" role="img" aria-label="散点与候选模型拟合曲线"></canvas>
+<div class="legend"><span class="dots">观测点</span><span>AICc 最低</span><span class="other">其余候选</span></div>
+<hr><h2>残差</h2><p class="sub">观测值减去 AICc 最低模型的拟合值</p><canvas id="residual" role="img" aria-label="最优候选模型残差图"></canvas>
+</section>
+<section class="card">
+<h2>模型比较</h2><p class="verdict" id="verdict" aria-live="polite"></p>
+<div class="result-block"><h2>全数据拟合</h2><p class="sub">ΔAICc 越小越好。RMSE 与信号同单位。</p>
+<div class="table-wrap"><table><thead><tr><th>候选模型</th><th>ΔAICc</th><th>RMSE</th></tr></thead><tbody id="fits"></tbody></table></div><dl id="params" class="params"></dl></div>
+<div class="result-block"><h2>机器学习的曲线形状提示</h2><p class="sub">近邻投票比例，反映模拟训练集里相似曲线的类别构成。</p><div id="votes" class="votes"></div></div>
+</section>
+</div>
+<details class="card notes" open><summary>模型、训练数据与适用条件</summary>
+<p>三类模型都有常数基线 C：单指数 <code>C+A·exp(-t/τ)</code>、双指数 <code>C+A₁·exp(-t/τ₁)+A₂·exp(-t/τ₂)</code>、拉伸指数 <code>C+A·exp(-(t/τ)^β)</code>。把首个时间点视为 t=0，振幅约束为非负。候选参数通过网格搜索估计。</p>
+<p id="validation"></p>
+<p>ΔAICc 小于 2 的候选会提示难以区分。AICc 假设残差独立、近似同方差。拟合排序和近邻提示都受候选模型、测量窗口、时间误差、噪声与训练数据影响，尤其在信号变化小或两种时间尺度接近时。训练集与验证集均为模拟数据。投票比例不是模型正确的概率。</p>
+</details>
+<details class="card notes"><summary>CSV 格式及开发说明</summary><p>两列数值，逗号、制表符或分号分隔。首行可以是 <code>time,signal</code>，或直接从数据开始。支持 12 至 2,000 个互不重复的时间点。时间行可乱序，内部会排序。</p><p>本原型由 ChatGPT Codex 辅助完成，包含模型实现、界面与验证脚本。示例和训练数据为程序生成。</p></details>
+</main>
+<script>
+"use strict";
+
+const models = [
+  { name: "单指数", key: "single" },
+  { name: "双指数", key: "double" },
+  { name: "拉伸指数", key: "stretched" }
+];
+
+function parseCsv(csv) {
+  const lines = csv.replace(/^\uFEFF/, "").trim().split(/\r?\n/).filter(line => line.trim());
+  const hasHeader = /^\s*"?time"?\s*[,;\t]\s*"?signal"?\s*$/i.test(lines[0] || "");
+  const rows = lines.slice(Number(hasHeader));
+  if (rows.length < 12 || rows.length > 2000) throw Error("CSV 需要 12 至 2,000 行观测数据。");
+  const separator = rows[0].includes("\t") ? "\t" : rows[0].includes(";") ? ";" : ",";
+  const number = /^[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:e[+-]?\d+)?$/i;
+  const data = rows.map((line, index) => {
+    const columns = line.split(separator).map(s => s.trim().replace(/^"(.*)"$/, "$1").trim());
+    if (columns.length !== 2 || columns.some(s => !number.test(s) || !Number.isFinite(Number(s)))) {
+      throw Error("第 " + (index + 1 + Number(hasHeader)) + " 个非空行须包含两个有限数值。");
+    }
+    return columns.map(Number);
+  }).sort((a, b) => a[0] - b[0]);
+  if (data.some((row, i) => i > 0 && row[0] === data[i - 1][0])) {
+    throw Error("存在重复的时间点，请先合并重复测量。");
+  }
+  return data;
+}
+
+function randomGenerator(seed) {
+  return function () {
+    seed = (Math.imul(1664525, seed) + 1013904223) >>> 0;
+    return (seed + 0.5) / 4294967296;
+  };
+}
+const gaussian = rng => Math.sqrt(-2 * Math.log(rng())) * Math.cos(2 * Math.PI * rng());
+
+function generate(count, kind, rng, config) {
+  const rate = config ? config.rate : 0.85 + 2.9 * rng();
+  const fast = config ? config.fast : 3.5 + 11 * rng();
+  const mix = config ? config.mix : 0.27 + 0.47 * rng();
+  const beta = config ? config.beta : 0.42 + 0.43 * rng();
+  const noise = config ? config.noise : 0.008 + 0.067 * rng();
+  const scale = config ? config.scale : 0.35 + 2.4 * rng();
+  const baseline = config ? config.base : -0.15 + 0.45 * rng();
+  const duration = config ? config.duration : 1;
+  return Array.from({ length: count }, (_, i) => {
+    const t = i / (count - 1);
+    const primary = Math.exp(-rate * t);
+    const shape = kind === 0 ? primary :
+      kind === 1 ? (1 - mix) * primary + mix * Math.exp(-fast * t) :
+      Math.exp(-Math.pow(rate * t, beta));
+    return [t * duration, baseline + scale * (shape + noise * gaussian(rng))];
+  });
+}
+
+function normalized(data) {
+  const first = data[0][0];
+  const duration = data[data.length - 1][0] - first;
+  let divisor = 0;
+  for (const [, y] of data) divisor = Math.max(divisor, Math.abs(y));
+  if (!Number.isFinite(duration) || duration <= 0 || divisor === 0) {
+    throw Error("需要有限的时间跨度与随时间变化的信号。");
+  }
+  const values = data.map(([, y]) => y / divisor);
+  const low = Math.min(...values);
+  const signalSpan = Math.max(...values) - low;
+  if (signalSpan <= 1e-12) throw Error("信号变化太小，无法比较衰减形状。");
+  return {
+    duration, divisor, low, signalSpan,
+    data: data.map(([t], i) => [(t - first) / duration, (values[i] - low) / signalSpan])
+  };
+}
+
+const featureCount = 20;
+
+function features(data) {
+  const result = [];
+  let index = 0;
+  for (let i = 0; i < featureCount; i += 1) {
+    const t = i / (featureCount - 1);
+    while (index + 1 < data.length - 1 && data[index + 1][0] < t) index += 1;
+    const [a, ya] = data[index];
+    const [b, yb] = data[index + 1];
+    result.push(ya + (yb - ya) * (t - a) / (b - a));
+  }
+  const mean = result.reduce((sum, value) => sum + value, 0) / result.length;
+  const centered = result.map(value => value - mean);
+  const magnitude = Math.hypot(...centered);
+  if (magnitude <= 1e-12) throw Error("等距重采样未捕捉到足够的信号变化。");
+  return centered.map(value => value / magnitude);
+}
+
+function distances(query, examples) {
+  return examples.map(example => {
+    const d = example.vector.reduce((sum, value, i) => sum + (value - query[i]) ** 2, 0);
+    return { kind: example.kind, d };
+  }).sort((a, b) => a.d - b.d);
+}
+
+const trainSize = 500;
+const validationSize = 120;
+const neighborCount = 21;
+
+function makeTraining() {
+  const rng = randomGenerator(281108);
+  return models.flatMap((_, kind) => Array.from({ length: trainSize }, () => ({
+    kind,
+    vector: features(generate(55, kind, rng))
+  })));
+}
+
+function classify(input, training) {
+  const nearest = distances(features(input), training).slice(0, neighborCount);
+  const tally = models.map(() => 0);
+  for (const { kind } of nearest) tally[kind] += 1;
+  return { tally, top: tally.indexOf(Math.max(...tally)), distance: Math.sqrt(nearest[0].d) };
+}
+
+function validateTraining(training) {
+  const rng = randomGenerator(964239);
+  const distances = [];
+  const matrix = models.map(() => models.map(() => 0));
+  for (let kind = 0; kind < models.length; kind += 1) {
+    for (let i = 0; i < validationSize; i += 1) {
+      const guess = classify(generate(47, kind, rng), training);
+      matrix[kind][guess.top] += 1;
+      distances.push(guess.distance);
+    }
+  }
+  distances.sort((a, b) => a - b);
+  return {
+    matrix,
+    correct: matrix.reduce((sum, row, index) => sum + row[index], 0),
+    total: validationSize * models.length,
+    threshold: distances[Math.floor(0.95 * (distances.length - 1))]
+  };
+}
+
+function fitShape(data, shape, second) {
+  let sx = 0, sy = 0, sz = 0, sxx = 0, sxy = 0, sxz = 0, szz = 0, szy = 0;
+  for (let i = 0; i < data.length; i += 1) {
+    const x = shape[i], y = data[i][1], z = second ? second[i] : 0;
+    sx += x; sy += y; sz += z;
+    sxx += x * x; sxy += x * y; sxz += x * z; szz += z * z; szy += z * y;
+  }
+  const n = data.length;
+  const xx = sxx - sx * sx / n, xy = sxy - sx * sy / n;
+  const zz = szz - sz * sz / n, zy = szy - sz * sy / n;
+  const xz = sxz - sx * sz / n;
+  const candidates = [[xx > 1e-13 ? Math.max(0, xy / xx) : 0, 0]];
+  if (second) {
+    candidates.push([0, zz > 1e-13 ? Math.max(0, zy / zz) : 0]);
+    const det = xx * zz - xz * xz;
+    if (xx > 0 && zz > 0 && det > 1e-10 * xx * zz) {
+      const ax = (xy * zz - zy * xz) / det;
+      const az = (zy * xx - xy * xz) / det;
+      if (ax > 0 && az > 0) candidates.push([ax, az]);
+    }
+  }
+  let best;
+  for (const [a, b] of candidates) {
+    const c = (sy - a * sx - b * sz) / n;
+    let sse = 0;
+    for (let i = 0; i < n; i += 1) {
+      const predicted = c + a * shape[i] + (second ? b * second[i] : 0);
+      sse += (data[i][1] - predicted) ** 2;
+    }
+    if (!best || sse < best.sse) best = { a, b, c, sse };
+  }
+  return best;
+}
+
+function expGrid(low, high, size) {
+  return Array.from({ length: size }, (_, i) => low * (high / low) ** (i / (size - 1)));
+}
+
+function fitModels(data) {
+  const grid = expGrid(0.08, 70, 51);
+  const curve = (rate, beta = 1) => data.map(([t]) => Math.exp(-Math.pow(rate * t, beta)));
+  const exponentials = grid.map(rate => curve(rate));
+  let single = { sse: Infinity }, double = { sse: Infinity }, stretched = { sse: Infinity };
+  for (let i = 0; i < grid.length; i += 1) {
+    const estimate = fitShape(data, exponentials[i]);
+    if (estimate.sse < single.sse) single = { ...estimate, rate: grid[i], beta: 1 };
+    for (let j = i + 1; j < grid.length; j += 1) {
+      const estimate = fitShape(data, exponentials[i], exponentials[j]);
+      if (estimate.sse < double.sse) double = { ...estimate, rate: grid[i], fast: grid[j], beta: 1 };
+    }
+    for (let k = 0; k <= 24; k += 1) {
+      const beta = 0.35 + 0.60 * k / 24;
+      const estimate = fitShape(data, curve(grid[i], beta));
+      if (estimate.sse < stretched.sse) stretched = { ...estimate, rate: grid[i], beta };
+    }
+  }
+  function refine(best, kind) {
+    for (let step = 0.065; step > 0.001; step /= 2) {
+      const current = best;
+      for (const i of [-1, 0, 1]) {
+        for (const j of (kind === 0 ? [0] : [-1, 0, 1])) {
+          const rate = current.rate * Math.exp(i * step);
+          const fast = kind === 1 ? current.fast * Math.exp(j * step) : 0;
+          const beta = kind === 2 ? current.beta + j * step / 3 : 1;
+          if (rate < 0.08 || rate > 70 || (fast && (fast <= rate || fast > 70)) ||
+            (kind === 2 && (beta < 0.35 || beta > 0.95))) continue;
+          const estimate = fitShape(data, curve(rate, beta), fast ? curve(fast) : undefined);
+          if (estimate.sse < best.sse) best = { ...estimate, rate, fast, beta };
+        }
+      }
+    }
+    return best;
+  }
+  return [single, double, stretched].map((trial, kind) => {
+    const fit = refine(trial, kind);
+    const p = [4, 6, 5][kind];
+    const n = data.length;
+    const aicc = n * Math.log(Math.max(1e-24, fit.sse / n)) + 2 * p + (2 * p * (p + 1)) / (n - p - 1);
+    const predict = t => fit.c + fit.a * Math.exp(-Math.pow(t * fit.rate, fit.beta)) +
+      (fit.fast ? fit.b * Math.exp(-t * fit.fast) : 0);
+    return { ...fit, kind, aicc, predict };
+  }).sort((a, b) => a.aicc - b.aicc);
+}
+
+const examples = [
+  { kind: 0, rate: 2.65, noise: 0.013, scale: 1.1, base: 0.14, duration: 40 },
+  { kind: 1, rate: 1.87, fast: 13.2, mix: 0.60, noise: 0.006, scale: 1.15, base: 0.18, duration: 40 },
+  { kind: 2, rate: 2.35, beta: 0.58, noise: 0.007, scale: 1.14, base: 0.15, duration: 40 },
+  { kind: 1, rate: 2.33, fast: 6.8, mix: 0.55, noise: 0.09, scale: 1.05, base: 0.13, duration: 40 }
+];
+function sample(index) {
+  return generate(64, examples[index].kind, randomGenerator(84721 + 7919 * index), examples[index]);
+}
+
+function analyze(raw, training) {
+  const scaled = normalized(raw);
+  const fits = fitModels(scaled.data);
+  const guess = classify(scaled.data, training);
+  return { scaled, fits, guess };
+}
+
+const byId = name => document.getElementById(name);
+const textElement = (tag, value) => {
+  const element = document.createElement(tag);
+  element.textContent = value;
+  return element;
+};
+const formatter = new Intl.NumberFormat("zh-CN", { maximumSignificantDigits: 4, useGrouping: false });
+const format = x => x === 0 ? "0" :
+  Math.abs(x) >= 1e5 || Math.abs(x) < 0.001 ? x.toExponential(2) : formatter.format(x);
+const cleanNumber = x => Number(x.toPrecision(12));
+const modelName = kind => models[kind].name;
+
+const training = makeTraining();
+const validation = validateTraining(training);
+const rates = validation.matrix.map((row, kind) => modelName(kind) + " " +
+  Math.round(100 * row[kind] / validationSize) + "%").join("，");
+byId("validation").textContent = "分类器在浏览器中用 1,500 条模拟曲线建立近邻索引，再用独立随机种子的 360 条模拟曲线验证。整体准确率 " +
+  (100 * validation.correct / validation.total).toFixed(1) + "%，各类召回率为" + rates +
+  "。曲线经等距重采样和归一化后，在 21 条最近样本中投票。";
+
+let current;
+
+function setData(raw, title, source, truth = null) {
+  const result = analyze(raw, training);
+  current = { ...result, raw, title, source, truth };
+  const { fits, guess, scaled } = current;
+  const top = fits[0];
+  const voteLead = guess.tally[guess.top] / neighborCount;
+  const trainingMismatch = guess.distance > validation.threshold;
+  const average = scaled.data.reduce((sum, [, y]) => sum + y, 0) / raw.length;
+  const flatSse = scaled.data.reduce((sum, [, y]) => sum + (y - average) ** 2, 0);
+  const hasTrend = top.sse < 0.80 * flatSse;
+  const uncertain = fits[1].aicc - top.aicc < 2 || !hasTrend || trainingMismatch ||
+    guess.top !== top.kind || voteLead < 0.55;
+  const verdict = byId("verdict");
+  verdict.dataset.caution = uncertain;
+  let explanation = modelName(top.kind) + "的 AICc 最低，且与形状提示一致。";
+  if (voteLead < 0.55) explanation = "近邻投票分散，建议结合残差和实验条件判断。";
+  if (guess.top !== top.kind) explanation = "拟合与形状提示不同，先保留备选模型。";
+  if (trainingMismatch) explanation = "曲线形状偏离模拟训练范围，近邻提示仅供参考。";
+  if (fits[1].aicc - top.aicc < 2) {
+    explanation = modelName(top.kind) + "与" + modelName(fits[1].kind) + "的 ΔAICc 不足 2，现有数据难以区分。";
+  }
+  if (!hasTrend) explanation = "数据支持的下降趋势较弱，暂不建议选择衰减模型。";
+  verdict.textContent = explanation;
+  byId("dataset").textContent = title + " · " + raw.length + " 个点 · " + source +
+    (truth === null ? "" : " · 模拟真值 " + modelName(truth));
+
+  const signalScale = scaled.signalSpan * scaled.divisor;
+  const rows = fits.map(fit => {
+    const row = document.createElement("tr");
+    const name = textElement("th", modelName(fit.kind));
+    name.scope = "row";
+    row.append(name, textElement("td", (fit.aicc - top.aicc).toFixed(2)),
+      textElement("td", format(fitRmse(fit, current))));
+    return row;
+  });
+  byId("fits").replaceChildren(...rows);
+
+  const params = [["基线 C", scaled.divisor * (scaled.low + top.c * scaled.signalSpan)]];
+  if (top.kind === 1) {
+    params.push(["慢衰减振幅 A₁", top.a * signalScale], ["慢时间常数 τ₁", scaled.duration / top.rate],
+      ["快衰减振幅 A₂", top.b * signalScale], ["快时间常数 τ₂", scaled.duration / top.fast]);
+  } else {
+    params.push(["振幅 A", top.a * signalScale], ["时间常数 τ", scaled.duration / top.rate]);
+    if (top.kind === 2) params.push(["拉伸指数 β", top.beta]);
+  }
+  byId("params").replaceChildren(...params.map(([name, value]) => {
+    const group = document.createElement("div");
+    group.append(textElement("dt", name), textElement("dd", format(value)));
+    return group;
+  }));
+
+  byId("votes").replaceChildren(...guess.tally.map((votes, kind) => {
+    const vote = document.createElement("div");
+    vote.className = "vote";
+    const meter = document.createElement("meter");
+    meter.setAttribute("aria-label", modelName(kind) + "近邻票数");
+    meter.max = neighborCount;
+    meter.value = votes;
+    vote.append(textElement("span", modelName(kind)), meter,
+      textElement("strong", Math.round(100 * votes / neighborCount) + "%"));
+    return vote;
+  }));
+  byId("error").textContent = "";
+  drawCharts();
+}
+
+function fitRmse(fit, result) {
+  const scale = result.scaled.signalSpan * result.scaled.divisor;
+  return Math.sqrt(fit.sse / result.raw.length) * scale;
+}
+
+function drawCharts() {
+  if (!current) return;
+  const { scaled, fits, raw } = current;
+  const top = fits[0];
+  const timeLabel = t => format(raw[0][0] + scaled.duration * t);
+  const signalLabel = y => format(scaled.divisor * (scaled.low + scaled.signalSpan * y));
+  const signalScale = scaled.divisor * scaled.signalSpan;
+  const count = 160;
+  const series = fits.map(fit => Array.from({ length: count + 1 }, (_, i) => {
+    const x = i / count;
+    return [x, fit.predict(x)];
+  }));
+  const ymin = Math.min(0, ...series.flat().map(point => point[1]));
+  const ymax = Math.max(1, ...series.flat().map(point => point[1]));
+  chart(byId("plot"), {
+    low: ymin - 0.05, high: ymax + 0.05, xLabel: timeLabel, yLabel: signalLabel, yticks: 5,
+    curves: series, dots: scaled.data, residual: false
+  });
+  const residuals = scaled.data.map(([x, y]) => [x, y - top.predict(x)]);
+  const abs = Math.max(0.007, ...residuals.map(point => Math.abs(point[1]))) * 1.14;
+  chart(byId("residual"), {
+    low: -abs, high: abs, xLabel: timeLabel, yLabel: r => format(r * signalScale), yticks: 2,
+    curves: [], dots: residuals, residual: true
+  });
+}
+
+function chart(canvas, config) {
+  const { low, high, xLabel, yLabel, yticks, curves, dots, residual } = config;
+  const bounds = canvas.getBoundingClientRect();
+  if (bounds.width < 100) return;
+  const ratio = Math.min(2, window.devicePixelRatio || 1);
+  canvas.width = Math.round(bounds.width * ratio);
+  canvas.height = Math.round(bounds.height * ratio);
+  const ctx = canvas.getContext("2d");
+  ctx.scale(ratio, ratio);
+  ctx.font = "11px ui-monospace, monospace";
+  const axisLeft = Math.max(49, ctx.measureText(yLabel(low)).width + 12,
+    ctx.measureText(yLabel(high)).width + 12);
+  const axisRight = bounds.width - Math.max(23, ctx.measureText(xLabel(1)).width / 2 + 3);
+  const axisTop = 10, axisBottom = bounds.height - 24;
+  const x = t => axisLeft + t * (axisRight - axisLeft);
+  const y = v => axisBottom - (v - low) / (high - low) * (axisBottom - axisTop);
+  ctx.lineWidth = 1;
+  ctx.strokeStyle = "#dce5df";
+  ctx.fillStyle = "#4d6460";
+  ctx.textAlign = "right";
+  for (let i = 0; i <= yticks; i += 1) {
+    const value = low + (high - low) * i / yticks;
+    const py = y(value);
+    ctx.beginPath();
+    ctx.moveTo(axisLeft, py);
+    ctx.lineTo(axisRight, py);
+    ctx.stroke();
+    ctx.fillText(yLabel(value), axisLeft - 7, py + 4);
+  }
+  ctx.textAlign = "center";
+  const nx = bounds.width < 405 ? 2 : 4;
+  for (let i = 0; i <= nx; i += 1) {
+    const t = i / nx;
+    ctx.fillText(xLabel(t), x(t), bounds.height - 7);
+  }
+  if (residual) {
+    ctx.strokeStyle = "#778984";
+    ctx.beginPath();
+    ctx.moveTo(axisLeft, y(0));
+    ctx.lineTo(axisRight, y(0));
+    ctx.stroke();
+  }
+  ctx.fillStyle = "rgba(67,83,83,0.67)";
+  for (const [t, datum] of dots) {
+    ctx.beginPath();
+    ctx.arc(x(t), y(datum), dots.length > 400 ? 1.2 : 2.25, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  for (let i = curves.length - 1; i >= 0; i -= 1) {
+    ctx.strokeStyle = ["#146853", "#a26138", "#797992"][i];
+    ctx.lineWidth = i ? 1.35 : 2.3;
+    ctx.setLineDash(i ? [i === 1 ? 4 : 9, 4] : []);
+    ctx.beginPath();
+    curves[i].forEach(([t, v], idx) => {
+      if (idx === 0) ctx.moveTo(x(t), y(v));
+      else ctx.lineTo(x(t), y(v));
+    });
+    ctx.stroke();
+  }
+}
+
+function download(filename, content, mime) {
+  const blobUrl = URL.createObjectURL(new Blob([content], { type: mime }));
+  const link = document.createElement("a");
+  link.href = blobUrl;
+  link.download = filename;
+  link.click();
+  setTimeout(() => URL.revokeObjectURL(blobUrl), 3000);
+}
+
+function loadExample(index) {
+  const title = byId("sample").options[index].text;
+  setData(sample(index), title, "合成示例", examples[index].kind);
+}
+const samples = byId("sample");
+samples.addEventListener("input", () => loadExample(Number(samples.value)));
+
+let importGeneration = 0;
+samples.addEventListener("input", () => { importGeneration += 1; });
+byId("file").addEventListener("change", async event => {
+  const file = event.target.files[0];
+  if (!file) return;
+  const generation = ++importGeneration;
+  try {
+    if (file.size > 1024 * 1024) throw Error("文件超过 1 MiB，请导入只含两列数值的 CSV。");
+    const csv = await file.text();
+    if (generation !== importGeneration) return;
+    setData(parseCsv(csv), file.name, "导入 CSV");
+    samples.selectedIndex = -1;
+  } catch (error) {
+    if (generation === importGeneration) {
+      byId("error").textContent = error.message + " 页面仍显示上一次分析。";
+    }
+  } finally {
+    event.target.value = "";
+  }
+});
+
+byId("raw").addEventListener("click", () => {
+  const csv = "time,signal\n" + current.raw.map(row => row.join(",")).join("\n") + "\n";
+  download("decay-data.csv", csv, "text/csv;charset=utf-8");
+});
+
+byId("export").addEventListener("click", () => {
+  const { fits, guess, scaled, raw, title, source, truth } = current;
+  const scale = scaled.signalSpan * scaled.divisor;
+  const result = {
+    dataset: title, source, samples: raw.length, exampleGroundTruth: truth === null ? null : models[truth].key,
+    timeOrigin: raw[0][0],
+    verdict: byId("verdict").textContent,
+    fits: fits.map(fit => ({
+      model: models[fit.kind].key,
+      deltaAicc: cleanNumber(fit.aicc - fits[0].aicc),
+      rmse: cleanNumber(fitRmse(fit, current)),
+      baseline: cleanNumber(scaled.divisor * (scaled.low + fit.c * scaled.signalSpan)),
+      amplitude: cleanNumber(fit.a * scale),
+      tau: cleanNumber(scaled.duration / fit.rate),
+      ...(fit.kind === 1 && { amplitudeFast: cleanNumber(fit.b * scale), tauFast: cleanNumber(scaled.duration / fit.fast) }),
+      ...(fit.kind === 2 && { beta: cleanNumber(fit.beta) })
+    })),
+    neighbors: models.map(({ key }, i) => ({ model: key, votes: guess.tally[i], total: neighborCount })),
+    syntheticValidation: { confusionMatrix: validation.matrix, correct: validation.correct, total: validation.total }
+  };
+  download("decay-analysis.json", JSON.stringify(result, null, 2) + "\n", "application/json");
+});
+
+new ResizeObserver(drawCharts).observe(byId("plot"));
+loadExample(0);
+</script>
+</body></html>
