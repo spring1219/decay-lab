@@ -11,8 +11,8 @@
       "total": 360,
       "aiccCorrect": 228,
       "knnCorrect": 283,
-      "clearCount": 137,
-      "clearCorrect": 121
+      "clearCount": 139,
+      "clearCorrect": 123
     },
     {
       "id": "irregular",
@@ -41,11 +41,11 @@
     {
       "id": "reference",
       "total": 360,
-      "accepted": 137,
+      "accepted": 139,
       "aiccOnly": {
-        "errors": 32,
-        "doubleAsSingle": 18,
-        "doubleAccepted": 46
+        "errors": 33,
+        "doubleAsSingle": 19,
+        "doubleAccepted": 47
       },
       "fitOnly": {
         "errors": 30,
@@ -83,7 +83,7 @@
       "total": 240,
       "accepted": 77,
       "aiccOnly": {
-        "errors": 28,
+        "errors": 29,
         "doubleAsSingle": 4,
         "doubleAccepted": 29
       },

@@ -63,11 +63,11 @@
   <section class="card" aria-labelledby="fits-heading">
     <h2 id="fits-heading" data-i18n="observations"></h2><p class="sub" id="dataset"></p>
     <p class="case-note" id="case-note" hidden><span id="case-desc"></span> <a id="case-source" href="https://www.itl.nist.gov/div898/strd/nls/data/misra1a.shtml" target="_blank" rel="noopener noreferrer" data-i18n="nistLink"></a></p>
-    <p class="chart-axis" id="signal-axis"></p><canvas id="plot" role="img" aria-describedby="dataset signal-axis"></canvas><p class="chart-axis horizontal" id="predictor-axis"></p>
+    <p class="chart-axis" id="signal-axis"></p><canvas id="plot" role="img" aria-describedby="dataset signal-axis predictor-axis"></canvas><p class="chart-axis horizontal" id="predictor-axis"></p>
     <div class="legend"><span class="dots" data-i18n="points"></span><span data-i18n="leadFit"></span><span class="other" data-i18n="secondFit"></span><span class="third" data-i18n="thirdFit"></span><span class="extrap" id="extrap-legend" data-i18n="extrapLegend" hidden></span><span class="excluded" id="excluded" data-i18n="excluded" hidden></span></div>
     <label class="extrap-choice" id="extrap-choice" hidden><input id="extrapolate" type="checkbox" checked> <span data-i18n="extrapolate"></span></label>
     <hr><h2 data-i18n="residual"></h2><p class="sub" data-i18n="residualHelp"></p>
-    <canvas id="residual" role="img"></canvas>
+    <canvas id="residual" role="img" aria-describedby="predictor-axis"></canvas>
   </section>
   <section class="card" aria-labelledby="comparison-heading">
     <h2 id="comparison-heading" data-i18n="compare"></h2>
@@ -78,7 +78,7 @@
       <div class="table-wrap"><table><thead><tr><th data-i18n="model"></th><th>ΔAICc</th><th>RMSE</th></tr></thead><tbody id="fits"></tbody></table></div>
       <dl id="params" class="params"></dl>
     </div>
-    <div class="result-block"><h2 data-i18n="knn"></h2><p class="sub" data-i18n="knnHelp"></p><div id="votes" class="votes"></div></div>
+    <div class="result-block"><h2 data-i18n="knn"></h2><p class="sub" id="knn-help" data-i18n="knnHelp"></p><div id="votes" class="votes"></div></div>
   </section>
 </div>
 <section class="card notes" aria-labelledby="evidence-heading">
@@ -174,10 +174,9 @@ function normalized(data) {
   const low = Math.min(...values);
   const signalSpan = Math.max(...values) - low;
   if (signalSpan <= 1e-12) throw Error("lowVariation");
-  return {
-    duration, divisor, low, signalSpan,
-    data: data.map(([t], i) => [(t - first) / duration, (values[i] - low) / signalSpan])
-  };
+  const rows = data.map(([t], i) => [(t - first) / duration, (values[i] - low) / signalSpan]);
+  if (rows.some(([x], i) => i > 0 && x <= rows[i - 1][0])) throw Error("predictorPrecision");
+  return {duration,divisor,low,signalSpan,data:rows};
 }
 
 const featureCount = 20;
@@ -195,7 +194,7 @@ function features(data) {
   const mean = result.reduce((sum, value) => sum + value, 0) / result.length;
   const centered = result.map(value => value - mean);
   const magnitude = Math.hypot(...centered);
-  if (magnitude <= 1e-12) throw Error("unresolvedShape");
+  if (magnitude <= 1e-12) return null;
   return centered.map(value => value / magnitude);
 }
 
@@ -219,7 +218,9 @@ function makeTraining() {
 }
 
 function classify(input, training) {
-  const nearest = distances(features(input), training).slice(0, neighborCount);
+  const vector = features(input);
+  if (!vector) return null;
+  const nearest = distances(vector, training).slice(0, neighborCount);
   const tally = models.map(() => 0);
   for (const { kind } of nearest) tally[kind] += 1;
   const votes = Math.max(...tally);
@@ -234,6 +235,7 @@ function validateTraining(training, seed = 964239) {
   for (let kind = 0; kind < models.length; kind += 1) {
     for (let i = 0; i < validationSize; i += 1) {
       const guess = classify(generate(47, kind, rng), training);
+      if (!guess) continue;
       if (guess.top !== null) matrix[kind][guess.top] += 1;
       distances.push(guess.distance);
     }
@@ -269,9 +271,10 @@ function goldenMinimum(low, high, evaluate, best) {
 }
 
 function simplexMinimum(initial, steps, bounds, evaluate) {
-  const point = coordinates => {
-    const x = coordinates.map((value, i) => Math.max(bounds[i][0], Math.min(bounds[i][1], value)));
-    return { x, fit:evaluate(x) };
+  const point = x => {
+    // Reject infeasible trials without projecting the simplex onto a boundary.
+    const outside = x.some((value, i) => value < bounds[i][0] || value > bounds[i][1]);
+    return { x, fit:outside ? {sse:Infinity} : evaluate(x) };
   };
   const byError = (a, b) => a.fit.sse - b.fit.sse;
   const simplex = [point(initial), ...initial.map((_, i) => {
@@ -302,7 +305,27 @@ function simplexMinimum(initial, steps, bounds, evaluate) {
       }
     }
   }
-  return simplex.sort(byError)[0].fit;
+  let best = simplex.sort(byError)[0];
+  // When a hard wall limits the simplex, finish the search along that face.
+  for (const [fixed, edges] of bounds.entries()) {
+    const edge = edges.find(value => Math.abs(value - best.x[fixed]) < steps[fixed] * 1e-4);
+    if (edge === undefined) continue;
+    const free = 1 - fixed;
+    const center = best.x[free];
+    const low = Math.max(bounds[free][0], center - steps[free]);
+    const high = Math.min(bounds[free][1], center + steps[free]);
+    const faceAt = x => {
+      const coordinates = [...best.x];
+      coordinates[fixed] = edge;
+      coordinates[free] = x;
+      const fit = evaluate(coordinates);
+      return {x,coordinates,fit,sse:fit.sse};
+    };
+    const seed = [faceAt(low),faceAt(center),faceAt(high)].sort((a,b) => a.sse - b.sse)[0];
+    const face = goldenMinimum(low,high,faceAt,seed);
+    if (face.sse < best.fit.sse) best = {x:face.coordinates,fit:face.fit};
+  }
+  return best.fit;
 }
 
 function fitModels(data) {
@@ -366,11 +389,11 @@ function fitModels(data) {
 
   const logBounds = rateBounds.map(Math.log);
   const steps = [(logBounds[1] - logBounds[0]) / 50, (betaBounds[1] - betaBounds[0]) / 24];
-  const grid = Array.from({length:51}, (_, i) => logBounds[0] + i * steps[0]);
+  const grid = Array.from({length:51}, (_, i) => i === 50 ? logBounds[1] : logBounds[0] + i * steps[0]);
   const rates = grid.map(Math.exp);
   const exponentials = rates.map(rate => shape(rate));
   const betas = Array.from({length:25}, (_, i) => {
-    const beta = betaBounds[0] + i * steps[1];
+    const beta = i === 24 ? betaBounds[1] : betaBounds[0] + i * steps[1];
     return { beta, powers:time.map(value => value ** beta) };
   });
   let single = { sse:Infinity }, double = { sse:Infinity }, stretched = { sse:Infinity };
@@ -425,9 +448,26 @@ function sample(index, noise = examples[index].noise) {
   return generate(64, config.kind, randomGenerator(paired ? 92621 : 84721 + 7919 * index), config);
 }
 
+function fittedValues(fit, scaled) {
+  const scale = scaled.signalSpan * scaled.divisor;
+  const values = {
+    rmse:Math.sqrt(fit.sse / scaled.data.length) * scale,
+    baseline:scaled.divisor * (scaled.low + fit.c * scaled.signalSpan),
+    amplitude:fit.a * scale,
+    tau:scaled.duration / fit.rate,
+    ...(fit.kind === 1 && {amplitudeFast:fit.b * scale,tauFast:scaled.duration / fit.fast}),
+    ...(fit.kind === 2 && {beta:fit.beta})
+  };
+  if (!(scale > 0) || values.tau === 0 || values.tauFast === 0 || !Object.values(values).every(Number.isFinite)) {
+    throw Error("numberRange");
+  }
+  return values;
+}
+
 function analyze(raw, training) {
   const scaled = normalized(raw);
   const fits = fitModels(scaled.data);
+  for (const fit of fits) fit.output = fittedValues(fit, scaled);
   const guess = classify(scaled.data, training);
   return { scaled, fits, guess };
 }
@@ -450,6 +490,10 @@ function diagnose(result, distanceLimit) {
   if (top.kind === 1 && (top.fast / top.rate < 1.15 || Math.min(top.a,top.b) < 0.01 * (top.a + top.b))) {
     warnings.push("degenerate");
   }
+  if (!guess) {
+    warnings.push("unresolvedShape");
+    return { warnings, delta, distanceLimit };
+  }
   if (guess.top === null) warnings.push("tie");
   else if (guess.top !== top.kind) warnings.push("disagree");
   if (guess.distance > distanceLimit) warnings.push("distance");
@@ -461,7 +505,7 @@ function diagnose(result, distanceLimit) {
 function compareWindow(active, full) {
   return {
     fitChanged: active.fits[0].kind !== full.fits[0].kind,
-    shapeChanged: active.guess.leaders.join() !== full.guess.leaders.join()
+    shapeChanged: active.guess && full.guess ? active.guess.leaders.join() !== full.guess.leaders.join() : null
   };
 }
 
@@ -494,7 +538,6 @@ const strings = {
     "nistNote": "14 observations. The predictor is pressure and the plotted signal is negative measured volume, so an increasing saturation becomes a declining curve. NIST uses a single-exponential saturation model. Our flexible fits and shape check disagree; the ranking alone cannot establish two physical scales.",
     "points": "Observations",
     "leadFit": "Lowest AICc",
-    "otherFits": "Other fits",
     "residual": "Residuals",
     "residualHelp": "Observation minus the prediction of the lowest-AICc fit.",
     "plotAria": "Observed values and fitted curves",
@@ -561,9 +604,13 @@ const strings = {
     "csvCount": "CSV needs 12–2,000 data rows.",
     "csvNumbers": "Nonempty row {0} must contain two finite numbers.",
     "duplicateX": "Repeated predictor values found. Merge repeat measurements first.",
+    "predictorPrecision": "Some predictor values are indistinguishable within this span. Select a smaller range of observations.",
+    "numberRange": "Some fitted values exceed the numeric range. Rescale the predictor or signal before importing.",
     "invalidSpan": "The predictor span and signal must be finite, and the signal must vary.",
     "lowVariation": "The signal varies too little to compare decay shapes.",
-    "unresolvedShape": "Resampling did not capture enough signal variation.",
+    "unresolvedShape": "The 20 shape-check samples missed the signal variation. Only the fit ranking is available.",
+    "shapeUnavailable": "Unavailable",
+    "offsetAxis": "{0} (offset from {1})",
     "largeCsv": "Choose a two-column CSV smaller than 1 MiB.",
     "importError": "The CSV could not be read.",
     "keptData": "The previous analysis is still displayed.",
@@ -582,7 +629,7 @@ const strings = {
     "excluded": "Points outside the fit",
     "fullReference": "Full-window leads: AICc · {0}. kNN · {1}.",
     "windowChanged": "At least one leading model changes when the full data are included.",
-    "windowUnavailable": "This window cannot be fit. Move the endpoint later to include more variation.",
+    "windowUnavailable": "This window cannot be fit. Try a different observation endpoint.",
     "windowGraph": "Observed values and fitted curves. Faded points are excluded from the selected fit.",
     "matchedTitle": "Does the warning policy help at the same coverage?",
     "matchedHelp": "Within each simulated condition all policies return the same number of results. The AICc-gap baseline takes the largest gaps between its top two fits. The combined policy also uses the shape checks.",
@@ -604,7 +651,7 @@ const strings = {
     "thirdFit": "Third by AICc",
     "extrapolate": "Show extrapolated leading fit",
     "extrapLegend": "Leading fit extrapolated",
-    "fitOnlyErrors": "Fit-only warnings",
+    "fitOnlyErrors": "Fit-only errors",
     "fitBounds": "The search uses dimensionless rates from 0.08 to 70 across the selected predictor span and stretch exponents from 0.35 to 0.95."
   },
   "zh": {
@@ -626,7 +673,6 @@ const strings = {
     "nistNote": "共 14 个观测点。自变量是压力，信号是测得体积的负值，将随压力上升的饱和曲线转换为下降曲线。NIST 使用单指数饱和模型。本工具的拟合排名与形状提示不同，排名本身无法证实存在两个物理尺度。",
     "points": "观测点",
     "leadFit": "AICc 最低",
-    "otherFits": "其他拟合",
     "residual": "残差",
     "residualHelp": "观测值减去 AICc 最低模型的拟合值。",
     "plotAria": "观测散点与候选模型拟合曲线",
@@ -693,9 +739,13 @@ const strings = {
     "csvCount": "CSV 需要 12 至 2,000 行数据。",
     "csvNumbers": "第 {0} 个非空行须包含两个有限数值。",
     "duplicateX": "存在重复的自变量值，请先合并重复测量。",
+    "predictorPrecision": "在当前跨度下，部分自变量无法用数值精度区分。请缩小观测范围。",
+    "numberRange": "部分拟合结果超出了数值范围。请调整自变量或信号的数量级后重新导入。",
     "invalidSpan": "自变量跨度和信号需有限，且信号须有变化。",
     "lowVariation": "信号变化太小，无法比较衰减形状。",
-    "unresolvedShape": "等距重采样未捕捉到足够的信号变化。",
+    "unresolvedShape": "形状检查的 20 个采样点未捕捉到足够的信号变化，仅显示拟合排名。",
+    "shapeUnavailable": "无法判别",
+    "offsetAxis": "{0}（相对 {1} 的差值）",
     "largeCsv": "请选择小于 1 MiB 的两列 CSV。",
     "importError": "无法读取 CSV。",
     "keptData": "页面仍显示上一次分析。",
@@ -714,7 +764,7 @@ const strings = {
     "excluded": "未纳入拟合的观测点",
     "fullReference": "完整窗口的首选模型为 AICc · {0}，kNN · {1}。",
     "windowChanged": "加入完整数据后，至少一种方法的首选模型发生变化。",
-    "windowUnavailable": "当前窗口无法拟合。请把截止点后移，纳入变化更明显的数据。",
+    "windowUnavailable": "当前窗口无法拟合。请尝试调整观测截止点。",
     "windowGraph": "观测点与候选模型拟合曲线。浅色点未纳入当前拟合。",
     "matchedTitle": "给出结论的比例相同时，综合警告有用吗？",
     "matchedHelp": "每个模拟条件下，各策略给出相同数量的结论。AICc 差值基线选择前两名分差最大的样例。综合策略另外使用近邻形状检查。",
@@ -736,7 +786,7 @@ const strings = {
     "thirdFit": "AICc 第 3 名",
     "extrapolate": "显示首选拟合的外推",
     "extrapLegend": "首选拟合外推",
-    "fitOnlyErrors": "仅拟合警告",
+    "fitOnlyErrors": "仅拟合的误判",
     "fitBounds": "按当前窗口跨度归一化的速率搜索范围为 0.08 至 70，拉伸指数 β 的搜索范围为 0.35 至 0.95。"
   }
 };
@@ -754,8 +804,8 @@ const benchmark = {
       "total": 360,
       "aiccCorrect": 228,
       "knnCorrect": 283,
-      "clearCount": 137,
-      "clearCorrect": 121
+      "clearCount": 139,
+      "clearCorrect": 123
     },
     {
       "id": "irregular",
@@ -784,11 +834,11 @@ const benchmark = {
     {
       "id": "reference",
       "total": 360,
-      "accepted": 137,
+      "accepted": 139,
       "aiccOnly": {
-        "errors": 32,
-        "doubleAsSingle": 18,
-        "doubleAccepted": 46
+        "errors": 33,
+        "doubleAsSingle": 19,
+        "doubleAccepted": 47
       },
       "fitOnly": {
         "errors": 30,
@@ -826,7 +876,7 @@ const benchmark = {
       "total": 240,
       "accepted": 77,
       "aiccOnly": {
-        "errors": 28,
+        "errors": 29,
         "doubleAsSingle": 4,
         "doubleAccepted": 29
       },
@@ -915,11 +965,11 @@ let locale = "en";
 let formatter;
 const tr = (key, ...values) => strings[locale][key].replace(/\{(\d+)\}/g, (_, i) => values[i]);
 const modelName = kind => strings[locale].names[kind];
-const shapeName = guess => guess.top === null
+const shapeName = guess => !guess ? tr("shapeUnavailable") : guess.top === null
   ? tr("tied",guess.leaders.map(modelName).join(" / ")) : modelName(guess.top);
 const format = x => x === 0 ? "0" :
   Math.abs(x) >= 1e5 || Math.abs(x) < 0.001 ? x.toExponential(2) : formatter.format(x);
-const cleanNumber = x => Number(x.toPrecision(12));
+
 const percent = (value, count) => count ? (100 * value / count).toFixed(1) + "%" : "—";
 
 const training = makeTraining();
@@ -1016,7 +1066,8 @@ function renderControls() {
   slider.max = raw.length;
   slider.value = requestedCount;
   slider.disabled = raw.length <= 12;
-  const endpoint = format(raw[requestedCount - 1][0]);
+  const end = raw[requestedCount - 1][0];
+  const endpoint = format(end) === format(raw[requestedCount - 2][0]) ? String(end) : format(end);
   slider.setAttribute("aria-valuetext", tr("windowValue", requestedCount, raw.length, endpoint));
   byId("window-count").value = tr("windowCount", requestedCount, raw.length, endpoint);
   byId("window-early").disabled = requestedCount === earlyCount();
@@ -1051,7 +1102,7 @@ function applyWindow() {
       if (comparison.fitChanged || comparison.shapeChanged) result.diagnostic.warnings.push("windowChanged");
       current = { ...result, comparison };
     } catch (error) {
-      if (!["invalidSpan", "lowVariation", "unresolvedShape"].includes(error.message)) throw error;
+      if (!["invalidSpan", "lowVariation", "predictorPrecision", "numberRange"].includes(error.message)) throw error;
       current = null;
     }
   }
@@ -1085,8 +1136,7 @@ function renderData() {
   ].filter(Boolean).join(" · ");
   byId("case-note").hidden = meta.source !== "measured";
   byId("case-desc").textContent = tr("nistNote");
-  byId("signal-axis").textContent = tr(meta.y || "signal");
-  byId("predictor-axis").textContent = tr(meta.x || "time");
+  byId("knn-help").hidden = !current?.guess;
   if (!current) {
     byId("verdict").dataset.caution = "true";
     byId("verdict-title").textContent = tr("windowUnavailable");
@@ -1095,7 +1145,7 @@ function renderData() {
     drawCharts();
     return;
   }
-  const { fits, guess, scaled, diagnostic } = current;
+  const { fits, guess, diagnostic } = current;
   const top = fits[0];
   const hasWarnings = diagnostic.warnings.length > 0;
   byId("verdict").dataset.caution = String(hasWarnings);
@@ -1104,22 +1154,22 @@ function renderData() {
   byId("warnings").replaceChildren(...diagnostic.warnings.map(key => textElement("li",tr(key))));
   pairs("leaders", [[tr("fitLead"), modelName(top.kind)], [tr("shapeLead"), shapeName(guess)]]);
 
-  const signalScale = scaled.signalSpan * scaled.divisor;
   byId("fits").replaceChildren(...fits.map(fit => row([
-    modelName(fit.kind), (fit.aicc - top.aicc).toFixed(2), format(fitRmse(fit, current))
+    modelName(fit.kind), (fit.aicc - top.aicc).toFixed(2), format(fit.output.rmse)
   ], true)));
 
-  const params = [["baseline", scaled.divisor * (scaled.low + top.c * scaled.signalSpan)]];
+  const {baseline, amplitude, amplitudeFast, tau, tauFast, beta} = top.output;
+  const params = [["baseline",baseline]];
   if (top.kind === 1) {
-    params.push(["slowAmplitude", top.a * signalScale], ["slowTau", scaled.duration / top.rate],
-      ["fastAmplitude", top.b * signalScale], ["fastTau", scaled.duration / top.fast]);
+    params.push(["slowAmplitude",amplitude], ["slowTau",tau], ["fastAmplitude",amplitudeFast], ["fastTau",tauFast]);
   } else {
-    params.push(["amplitude", top.a * signalScale], ["tau", scaled.duration / top.rate]);
-    if (top.kind === 2) params.push(["beta", top.beta]);
+    params.push(["amplitude",amplitude], ["tau",tau]);
+    if (top.kind === 2) params.push(["beta",beta]);
   }
-  pairs("params", params.map(([key,value]) => [tr(key),format(value)]));
+  pairs("params", params.map(([key,value]) => [tr(key),
+    key === "baseline" && format(value) === format(value + amplitude + (amplitudeFast ?? 0)) ? String(value) : format(value)]));
 
-  byId("votes").replaceChildren(...guess.tally.map((votes, kind) => {
+  byId("votes").replaceChildren(...(guess?.tally ?? []).map((votes, kind) => {
     const vote = document.createElement("div");
     vote.className = "vote";
     const meter = document.createElement("meter");
@@ -1133,9 +1183,13 @@ function renderData() {
   drawCharts();
 }
 
-function fitRmse(fit, result) {
-  const scale = result.scaled.signalSpan * result.scaled.divisor;
-  return Math.sqrt(fit.sse / result.raw.length) * scale;
+const chartFont = "11px ui-monospace, monospace";
+
+function yAxisTicks(low, high, divisions, formatLabel) {
+  return Array.from({length:divisions + 1}, (_,i) => {
+    const value = low + (high - low) * i / divisions;
+    return {value,label:formatLabel(value)};
+  });
 }
 
 function drawCharts() {
@@ -1143,7 +1197,12 @@ function drawCharts() {
   const { full, count } = dataset;
   const whole = full.scaled;
   const origin = full.raw[0][0];
-  const timeLabel = t => format(origin + whole.duration * t);
+  const absoluteTime = t => format(origin + whole.duration * t);
+  const timeTicks = [0,0.25,0.5,0.75,1].map(absoluteTime);
+  const offsetTime = new Set(timeTicks).size < timeTicks.length;
+  const timeLabel = offsetTime ? t => format(whole.duration * t) : absoluteTime;
+  const predictorTitle = tr(dataset.meta.x || "time");
+  byId("predictor-axis").textContent = offsetTime ? tr("offsetAxis", predictorTitle, String(origin)) : predictorTitle;
   const signalLabel = y => format(whole.divisor * (whole.low + whole.signalSpan * y));
   const cutoff = whole.data[count - 1][0];
   function height(fit, t) {
@@ -1162,30 +1221,50 @@ function drawCharts() {
     : [];
   byId("extrap-legend").hidden = stretch.length === 0;
   const fittedHeights = series.flat().map(([, y]) => y);
-  const low = Math.min(0, ...fittedHeights) - 0.05;
-  const high = Math.max(1, ...fittedHeights) + 0.05;
+  const representable = Number.MAX_VALUE / whole.divisor;
+  const low = Math.max((-representable - whole.low) / whole.signalSpan, Math.min(0,...fittedHeights) - 0.05);
+  const high = Math.min((representable - whole.low) / whole.signalSpan, Math.max(1,...fittedHeights) + 0.05);
   const residuals = current ? current.scaled.data.map(([x, y]) => [
     x * cutoff, y - current.fits[0].predict(x)
   ]) : [];
-  const abs = Math.max(0.007, ...residuals.map(([, y]) => Math.abs(y))) * 1.14;
-  const rLabel = r => format(r * current.scaled.divisor * current.scaled.signalSpan);
-  const labels = [signalLabel(low),signalLabel(high),...(current ? [rLabel(-abs),rLabel(abs)] : [])];
-  const margin = Math.max(49, ...labels.map(label => 7 * label.length + 12));
-  chart(byId("plot"), {
-    low, high, xLabel:timeLabel, yLabel:signalLabel, yticks:5, margin,
+  const scale = current ? current.scaled.divisor * current.scaled.signalSpan : 1;
+  const abs = Math.min(Number.MAX_VALUE / scale, Math.max(0.007,...residuals.map(([,y]) => Math.abs(y))) * 1.14);
+  const rLabel = r => format(r * scale);
+  let mainTicks = yAxisTicks(low,high,5,signalLabel);
+  const signalTitle = tr(dataset.meta.y || "signal");
+  const offsetSignal = new Set(mainTicks.map(tick => tick.label)).size < mainTicks.length;
+  if (offsetSignal) {
+    const span = whole.signalSpan * whole.divisor;
+    mainTicks = yAxisTicks(low,high,5,y => format(span * y));
+  }
+  byId("signal-axis").textContent = offsetSignal
+    ? tr("offsetAxis", signalTitle, String(Math.min(...full.raw.map(([,y]) => y)))) : signalTitle;
+  const residualTicks = current ? yAxisTicks(-abs,abs,2,rLabel) : [];
+  const plot = byId("plot");
+  const measure = plot.getContext("2d");
+  measure.save();
+  measure.font = chartFont;
+  measure.textAlign = "right";
+  const margin = Math.max(49, ...[...mainTicks,...residualTicks].map(({label}) => {
+    const size = measure.measureText(label);
+    return Math.ceil(Math.max(size.width,size.actualBoundingBoxLeft) + 12);
+  }));
+  measure.restore();
+  chart(plot, {
+    low, high, xLabel:timeLabel, ticks:mainTicks, margin,
     curves:series, dots:whole.data.slice(0, count), excluded:whole.data.slice(count), cutoff, stretch
   });
   const residualCanvas = byId("residual");
   residualCanvas.hidden = !current;
   if (!current) return;
   chart(residualCanvas, {
-    low:-abs, high:abs, xLabel:timeLabel, yLabel:rLabel, yticks:2, margin,
+    low:-abs, high:abs, xLabel:timeLabel, ticks:residualTicks, margin,
     curves:[], dots:residuals, residual:true, cutoff
   });
 }
 
 function chart(canvas, config) {
-  const { low, high, xLabel, yLabel, yticks, curves, dots, residual, margin, excluded = [], cutoff = 1, stretch = [] } = config;
+  const { low, high, xLabel, ticks, curves, dots, residual, margin, excluded = [], cutoff = 1, stretch = [] } = config;
   const bounds = canvas.getBoundingClientRect();
   if (bounds.width < 100) return;
   const ratio = Math.min(2, window.devicePixelRatio || 1);
@@ -1193,7 +1272,7 @@ function chart(canvas, config) {
   canvas.height = Math.round(bounds.height * ratio);
   const ctx = canvas.getContext("2d");
   ctx.scale(ratio, ratio);
-  ctx.font = "11px ui-monospace, monospace";
+  ctx.font = chartFont;
   const axisLeft = margin;
   const axisRight = bounds.width - Math.max(23, ctx.measureText(xLabel(1)).width / 2 + 3);
   const axisTop = 10, axisBottom = bounds.height - 24;
@@ -1214,14 +1293,13 @@ function chart(canvas, config) {
   ctx.strokeStyle = "#dce5df";
   ctx.fillStyle = "#4d6460";
   ctx.textAlign = "right";
-  for (let i = 0; i <= yticks; i += 1) {
-    const value = low + (high - low) * i / yticks;
+  for (const {value,label} of ticks) {
     const py = y(value);
     ctx.beginPath();
     ctx.moveTo(axisLeft, py);
     ctx.lineTo(axisRight, py);
     ctx.stroke();
-    ctx.fillText(yLabel(value), axisLeft - 7, py + 4);
+    ctx.fillText(label, axisLeft - 7, py + 4);
   }
   ctx.textAlign = "center";
   const nx = bounds.width < 405 ? 2 : 4;
@@ -1329,9 +1407,8 @@ byId("raw").addEventListener("click", () => {
 });
 
 byId("export").addEventListener("click", () => {
-  const {fits,guess,scaled,raw,diagnostic} = current;
+  const {fits,guess,raw,diagnostic} = current;
   const {meta} = dataset;
-  const scale = scaled.signalSpan * scaled.divisor;
   const result = {
     dataset:displayTitle(meta), source:meta.source, samples:raw.length, language:locale,
     predictor:meta.x || "time", signal:meta.y || "signal", predictorOrigin:raw[0][0],
@@ -1341,24 +1418,19 @@ byId("export").addEventListener("click", () => {
     observationWindow: {
       included:raw.length, available:dataset.full.raw.length,
       start:raw[0][0], end:raw.at(-1)[0], fullEnd:dataset.full.raw.at(-1)[0],
-      fullAiccLead:models[dataset.full.fits[0].kind].key, fullKnnLead:models[dataset.full.guess.top]?.key ?? null,
-      ...(current.comparison || {fitChanged:false, shapeChanged:false})
+      fullAiccLead:models[dataset.full.fits[0].kind].key, fullKnnLead:models[dataset.full.guess?.top]?.key ?? null,
+      ...(current.comparison || {fitChanged:false, shapeChanged:guess ? false : null})
     },
     ...(dataset.noise === null ? {} : {simulation:{noiseStandardDeviationFraction:dataset.noise / 100}}),
     verdict:byId("verdict-title").textContent, warnings:diagnostic.warnings,
-    distanceToNearest:guess.distance, distanceWarningThreshold:diagnostic.distanceLimit,
+    distanceToNearest:guess?.distance ?? null, distanceWarningThreshold:diagnostic.distanceLimit,
     fits: fits.map(fit => ({
       model: models[fit.kind].key,
-      deltaAicc: cleanNumber(fit.aicc - fits[0].aicc),
-      rmse: cleanNumber(fitRmse(fit, current)),
-      baseline: cleanNumber(scaled.divisor * (scaled.low + fit.c * scaled.signalSpan)),
-      amplitude: cleanNumber(fit.a * scale),
-      tau: cleanNumber(scaled.duration / fit.rate),
-      ...(fit.kind === 1 && { amplitudeFast: cleanNumber(fit.b * scale), tauFast: cleanNumber(scaled.duration / fit.fast) }),
-      ...(fit.kind === 2 && { beta: cleanNumber(fit.beta) })
+      deltaAicc: fit.aicc - fits[0].aicc,
+      ...fit.output
     })),
-    knnLeaders:guess.leaders.map(kind => models[kind].key),
-    neighbors: models.map(({ key }, i) => ({ model: key, votes: guess.tally[i], total: neighborCount })),
+    knnLeaders:guess?.leaders.map(kind => models[kind].key) ?? [],
+    neighbors: guess ? models.map(({ key }, i) => ({ model: key, votes: guess.tally[i], total: neighborCount })) : [],
     syntheticBenchmark:benchmark
   };
   download("decay-analysis.json", JSON.stringify(result, null, 2) + "\n", "application/json");

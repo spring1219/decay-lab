@@ -80,7 +80,7 @@ function prediction(rows, kind, training, threshold) {
   const diagnostic = core.diagnose(result, threshold);
   return {
     kind, result, delta: diagnostic.delta,
-    aicc: result.fits[0].kind, knn: result.guess.top,
+    aicc: result.fits[0].kind, knn: result.guess?.top ?? null,
     fitPass: diagnostic.warnings.every(key => !core.fitWarningKeys.includes(key)),
     clear: diagnostic.warnings.length === 0
   };
@@ -141,9 +141,46 @@ for (const index of [0,1,2]) {
   assert.equal(fits[0].kind,index);
   assert.ok(fits[0].sse < 1e-18);
 }
+const edgeCases = [
+  {rate:3.1,beta:0.355}, {rate:3.1,beta:0.36}, {rate:3.1,beta:0.945},
+  {rate:0.085,beta:0.355}, {rate:69,beta:0.945},
+  {rate:3.1,beta:0.35,boundary:true}, {rate:3.1,beta:0.95,boundary:true},
+  {rate:0.08,beta:0.6,boundary:true}, {rate:70,beta:0.6,boundary:true}
+];
+for (const {rate,beta,boundary = false} of edgeCases) {
+  const raw = core.generate(64,2,core.randomGenerator(19),{rate,beta,noise:0,scale:1,base:0,duration:1});
+  const result = core.analyze(raw,training);
+  const fit = result.fits[0];
+  const context = "Noiseless stretch: rate=" + rate + ", beta=" + beta;
+  assert.equal(fit.kind,2,context);
+  assert.ok(Math.abs(fit.rate - rate) < 1e-5 && Math.abs(fit.beta - beta) < 1e-8,context);
+  assert.ok(fit.sse < 1e-17,context);
+  assert.equal(core.diagnose(result,calibrated.threshold).warnings.includes("boundary"),boundary,context);
+}
+for (const rate of [0.12,7]) {
+  const raw = core.generate(64,1,core.randomGenerator(19),{rate,fast:70,mix:0.5,noise:0,base:0.2,scale:1.4,duration:1});
+  const fit = core.analyze(raw,training).fits[0];
+  assert.equal(fit.kind,1);
+  assert.ok(Math.abs(fit.rate - rate) < 1e-5 && Math.abs(fit.fast - 70) < 1e-5);
+  assert.ok(fit.sse < 1e-17);
+}
+const collapsedPredictor = Array.from({length:12},(_,i)=>[i === 11 ? 1e300 : i * 1e-310,12 - i]);
+assert.throws(() => core.analyze(collapsedPredictor,training), /predictorPrecision/);
+const overflowingSignal = Array.from({length:21},(_,i)=>[i,1.6e308 * (1 - i / 10)]);
+assert.throws(() => core.analyze(overflowingSignal,training), /numberRange/);
+const overflowingScale = Array.from({length:21},(_,i)=>[i / 20 * 1.2e308,Math.exp(-0.2 * i / 20)]);
+assert.throws(() => core.analyze(overflowingScale,training), /numberRange/);
 const tieRows = core.normalized(core.sample(0,0)).data;
 const identicalShape = core.features(tieRows);
 const tiedTraining = Array.from({length:21},(_,i)=>({kind:i < 10 ? 0 : i < 20 ? 1 : 2,vector:identicalShape}));
+// A localized feature between resampling points can still be fit on the raw observations.
+const pulse = Array.from({length:60},(_,i)=>[i === 1 ? 0.01 : i === 2 ? 0.02 : i, i === 1 ? 3 : 2]);
+const missed = core.analyze(pulse,training);
+assert.equal(missed.fits.length,3);
+assert.equal(missed.guess,null);
+assert.ok(core.diagnose(missed,calibrated.threshold).warnings.includes("unresolvedShape"));
+assert.equal(core.compareWindow(missed,demo[0].result).shapeChanged,null);
+assert.equal(core.compareWindow(demo[0].result,missed).shapeChanged,null);
 const tied = core.classify(tieRows,tiedTraining);
 assert.equal(tied.top,null);
 assert.deepEqual(Array.from(tied.leaders),[0,1]);

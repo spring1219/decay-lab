@@ -14,7 +14,7 @@ The standalone HTML app pairs least-squares fitting and AICc with a k-nearest-ne
 
 ## What we learned
 
-At matched coverage on the regular independent-noise simulation, the fit-only approach made 30 errors and the combined fit and shape checks made 16 among 137 decisions. On the paired short-window simulation the same screening increased errors from 63 to 65 among 112 decisions. Comparing short and available full windows flagged 55 of 65 short-window mistakes that had passed the base warnings. It also flagged 2 of the 47 correct decisions. These are simulation results. The NIST adsorption example provides a separate walkthrough on measured data.
+At matched coverage on the regular independent-noise simulation, the fit-only approach made 30 errors and the combined fit and shape checks made 16 among 139 decisions. On the paired short-window simulation the same screening increased errors from 63 to 65 among 112 decisions. Comparing short and available full windows flagged 55 of 65 short-window mistakes that had passed the base warnings. It also flagged 2 of the 47 correct decisions. These are simulation results. The NIST adsorption example provides a separate walkthrough on measured data.
 
 ## Demo outline
 
