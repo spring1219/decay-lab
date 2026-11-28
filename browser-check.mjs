@@ -11,6 +11,44 @@ try {
   page.on("pageerror", error => errors.push(error.message));
   await page.goto(new URL("index.html",import.meta.url).href);
 
+  const evidence = page.locator("#challenge-evidence");
+  assert.match(await evidence.innerText(), /21 of 21/);
+  assert.equal(await page.locator("#sample").isVisible(), false);
+  assert.equal(await page.evaluate(() => dataset.full.raw.length),16);
+  assert.equal(await page.locator("#save-decision").isVisible(),false);
+  await page.locator("#advance").click();
+  assert.equal(await page.evaluate(() => current.raw.length),16);
+  await page.locator("#pick-model").selectOption("single");
+  await page.locator("#pick-action").selectOption("stop");
+  await page.locator("#reason").fill("Early agreement");
+  await page.locator("#language").click();
+  assert.equal(await page.locator("#pick-model").inputValue(),"single");
+  await page.locator("#advance").click();
+  assert.equal(await page.evaluate(() => current.raw.length),64);
+  assert.equal(await page.locator("#pick-model").inputValue(),"");
+  assert.equal(await page.locator("#reason").inputValue(),"");
+  assert.equal(await page.locator("#save-decision").isVisible(),false);
+  await page.locator("#pick-model").selectOption("uncertain");
+  await page.locator("#pick-action").selectOption("more");
+  await page.locator("#advance").click();
+  const [record] = await Promise.all([page.waitForEvent("download"),page.locator("#save-decision").click()]);
+  const answer = JSON.parse(await readFile(await record.path(),"utf8"));
+  assert.deepEqual(answer.decisions,[
+    {observations:16,model:"single",action:"stop",reason:"Early agreement"},
+    {observations:64,model:"uncertain",action:"more",reason:""}
+  ]);
+  await page.locator("#language").click();
+  assert.match(await evidence.innerText(),/two exponential components/);
+  await page.locator('#challenge a').click();
+  await page.locator('#sample').waitFor({state:'visible'});
+  assert.equal(await page.locator("#sample").inputValue(),"1");
+  await page.locator('#challenge-link a').click();
+  await evidence.waitFor({state:'visible'});
+  assert.match(await evidence.innerText(),/21 of 21/);
+  assert.equal(await page.locator("#save-decision").isVisible(),false);
+  await page.locator('#challenge a').click();
+  await page.locator('#sample').waitFor({state:'visible'});
+
   async function importCsv(name,rows) {
     const csv = "time,signal\n" + rows.map(row => row.join(",")).join("\n");
     await page.locator("#file").setInputFiles({name,mimeType:"text/csv",buffer:Buffer.from(csv)});

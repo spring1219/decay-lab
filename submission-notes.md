@@ -1,24 +1,23 @@
-# Decay Lab · Devpost copy draft
+# Decay Lab · Devpost draft
 
 ## Tagline
 
-See how the observation window changes what a decay curve can tell you.
+All 21 neighbors favor one exponential. Would you stop collecting data?
 
-## What it does
+## Problem and audience
 
-Decay Lab compares single, double and stretched exponential models in your browser. Choose a sample or import a two-column CSV. Move the observation endpoint and watch the fits, residuals and model rankings change. The default simulation uses the same double-exponential curve throughout. Its first 16 points favor a single exponential by both methods while all 64 favor a double exponential. The app highlights the new evidence that changes the ranking.
+In a physics or chemistry lab, students must decide whether they have observed a process for long enough. A short trace can look convincingly single-exponential even when a slower component emerges later.
 
-## How it works
+## What the judge can try
 
-The standalone HTML app pairs least-squares fitting and AICc with a k-nearest-neighbor shape check. The classifier uses 21 neighbors from 1,500 simulated training examples. All data processing happens locally. The analysis export records the selected window, warning reasons and the full-window reference. ChatGPT Codex assisted with development and validation.
+Open the app before watching the walkthrough. Only the first 16 measurements are supplied to the analysis. Commit to a model and a sampling decision, then examine 48 additional measurements. Commit again before the simulator reveals the generating model. The full lab also accepts CSV data, plots residuals and compares observation windows. A measured NIST adsorption example lets users inspect disagreement when the physical truth is not supplied by a simulator.
 
-## What we learned
+## How AI contributes
 
-At matched coverage on the regular independent-noise simulation, the fit-only approach made 30 errors and the combined fit and shape checks made 16 among 139 decisions. On the paired short-window simulation the same screening increased errors from 63 to 65 among 112 decisions. Comparing short and available full windows flagged 55 of 65 short-window mistakes that had passed the base warnings. It also flagged 2 of the 47 correct decisions. These are simulation results. The NIST adsorption example provides a separate walkthrough on measured data.
+A k-nearest-neighbor shape classifier compares 20 normalized samples to 1,500 simulated curves and tallies the closest 21. Alongside it, least-squares fitting ranks three candidate models using AICc. The two analyses use the same measurements. On the initial challenge trace, the single exponential receives all 21 votes, while its AICc advantage over the runner-up is only 2.74. Neither method sees the remaining observations until the second stage.
 
-## Demo outline
+## Evidence and limits
 
-1. Open the default example and show the two double-exponential leads.
-2. Shorten the selected window to 16 points. Show the faded observations and two single-exponential leads.
-3. Restore all 64 points. Adjust simulated noise with the underlying curve and random draws fixed.
-4. Open validation and point out the short-window failure case, then show where users import CSV and export results.
+In a fixed-seed independent-noise benchmark at matched decision counts, fit-only screening made 30 errors in 139 accepted decisions and combined screening made 16. On paired short-window simulations the counts were 63 and 65 errors in 112 accepted decisions. These numbers describe simulations. The classroom activity records voluntary, paired learner decisions locally. Classroom outcomes have yet to be measured.
+
+The app works offline in one HTML file. Codex assisted with development, interface design and testing.

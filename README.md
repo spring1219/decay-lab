@@ -2,9 +2,21 @@
 
 How much can one decay curve tell you? Decay Lab compares single, double and stretched exponential models, then lets you inspect how the rankings change when you cut the observation window short.
 
-## Try the window demo
+## Start with the sampling challenge
 
-1. Open `index.html` in a current browser. The default example is a simulated double exponential. With all 64 points, both methods favor the double exponential.
+Open `index.html` in a browser. The first screen shows only 16 simulated observations. Inspect the curve, model ranking and neighbor votes. Choose a model (or *undecided*) and decide whether to stop sampling. Record the evidence that guided you if you wish. The next screen adds 48 observations and asks for a second decision before revealing the generating model. Downloading the two decisions is optional. Answers stay in memory until you leave the activity or refresh the page.
+
+To use the original CSV and simulation workspace directly, open `index.html#lab` or choose **Open the full lab**. For a first-time participant, use the default entry and save this walkthrough and the video for afterwards.
+
+## Run a small classroom trial
+
+Invite students who have studied exponential decay and have not seen this particular example. Have each person open a fresh copy individually. Ask *“What would you report and what would you do next?”* Let them choose without coaching. Both stages proceed even if they select *stop*. After the second decision, invite them to share their downloaded JSON voluntarily. It records their two decisions and optional explanations, with no name field. Ask them to omit identifying information and obtain permission before quoting an explanation.
+
+Count actual first attempts separately from practice runs. Report the number invited, the number of paired records returned, and how many changed their model choice or sampling decision. Include unchanged and undecided answers. This fixed case can illustrate reasoning on one example. Measuring transfer or learning gains would require additional cases or a comparison group.
+
+## Explore the full lab
+
+1. Choose **Open the full lab**. The default example is a simulated double exponential. With all 64 points, both methods favor the double exponential.
 2. Click **Try early window**. With the first 16 points, both methods favor the single exponential. The app flags the change against the full-window reference and shades the unused points. The dashed extension projects the early fit into the held-out region. The residual chart shares the same predictor axis.
 3. Click **Use full window**. Increase **Simulated noise** to 2.5% to see AICc favor the single exponential and the shape check favor the double exponential. The underlying curve and random draws stay fixed as noise changes.
 4. Import your own CSV or choose another example. The English interface includes a Chinese toggle.
@@ -41,6 +53,4 @@ ChatGPT Codex assisted with the interface, data simulator, fitting and classific
 
 ## Review materials
 
-- [Benchmark results](benchmark-results.json) and [reproduction script](benchmark.mjs)
-- [Captioned walkthrough](media/decay-lab-v3.1.2-demo.webm) and [screenshots](media)
-- [Competition description draft](submission-notes.md)
+[Captioned walkthrough](media/decay-lab-v3.2-demo.webm) · [Challenge screenshot](media/sampling-challenge.jpg) · [Competition description](submission-notes.md)

@@ -12,6 +12,8 @@
 
 .window-card{margin-bottom:16px;padding:15px 18px}.window-controls{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,290px),1fr));gap:10px 26px;margin-top:8px}.window-controls .control{min-width:0}.control-label{display:flex;justify-content:space-between;align-items:baseline;gap:10px;font-size:13px;font-weight:700}.control-label output{font:12px var(--mono);color:var(--muted);text-align:right}.window-controls input[type=range]{display:block;width:100%;margin:5px 0;min-height:28px;accent-color:var(--brand);cursor:pointer}.window-controls input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}.window-controls input:disabled{cursor:default}.window-actions{display:flex;gap:7px;flex-wrap:wrap}.window-actions button{min-height:34px;padding:4px 10px;font-size:12px}.window-actions button:disabled,button:disabled{cursor:default;opacity:.53}.window-actions button:disabled:hover{background:var(--paper);border-color:#b8c9bd}.window-message{margin:6px 0 0;color:var(--brand);font-size:13px}.window-message:empty{display:none}.legend .excluded::before{height:6px;width:6px;border-radius:50%;background:#b4bfba}.method-comparison{padding-top:14px;margin-top:14px;border-top:1px solid var(--line)}.method-comparison h3{font-size:15px;margin:0}.method-comparison .sub{margin-bottom:5px}.method-comparison .benchmark th:first-child{min-width:140px}@media(max-width:450px){.window-card{padding:12px}.window-actions button{min-height:38px}}
 .legend .third::before{height:0;border-top:2px dashed #797992;background:none}.legend .extrap::before{height:0;border-top:2px dashed #528c79;background:none}.extrap-choice{display:flex;gap:6px;align-items:center;margin-top:8px;color:var(--muted);font-size:12px}.extrap-choice[hidden]{display:none}.extrap-choice input{accent-color:var(--brand)}
+[hidden]{display:none!important}.blind .toolbar,.blind section[aria-labelledby="window-heading"],.blind .notes{display:none}#challenge .window-controls{margin:12px 0}#challenge label{display:block;font-size:14px}#challenge select,#reason{display:block;width:100%;max-width:100%;margin:4px 0 8px}#reason{padding:8px;border:1px solid var(--line);border-radius:5px;font:inherit}#advance{background:var(--brand);color:white}#challenge a,#challenge-link a{display:inline-block;margin:8px 0;color:var(--brand)}#challenge h2{margin:0}#challenge p{margin:7px 0}#challenge-link{margin:0 0 10px}
+.blind main{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(310px,1fr);gap:12px;align-items:start}.blind .mast,.blind header{grid-column:1/-1}.blind header{padding:10px 0}.blind header h1{font-size:clamp(24px,3.4vw,46px);line-height:1.12}.blind header p{margin:6px 0}.blind .grid{display:contents}.blind #error{display:none}.blind #challenge{grid-column:2;grid-row:3;margin:0}.blind section[aria-labelledby="fits-heading"]{grid-column:1;grid-row:3}.blind section[aria-labelledby="comparison-heading"]{grid-column:1/-1}.blind section[aria-labelledby="fits-heading"] hr,.blind section[aria-labelledby="fits-heading"] hr~*{display:none}.blind #challenge .window-controls{grid-template-columns:1fr}.blind #plot{height:235px}@media(max-width:740px){.blind main{grid-template-columns:1fr}.blind #challenge{grid-column:1;grid-row:4}.blind section[aria-labelledby="fits-heading"]{grid-row:3}.blind #plot{height:150px}.blind header{padding:0}.blind header h1{font-size:25px}.blind header p{font-size:13px}}
 </style>
 </head>
 <body>
@@ -21,7 +23,24 @@
   <div class="mast-actions"><small data-i18n="local"></small>
   <button type="button" id="language" aria-label="Switch language">中文</button></div>
 </div>
-<header><h1 data-i18n="title"></h1><p data-i18n="intro"></p></header>
+<header><h1 data-i18n="title"></h1><p id="intro-text" data-i18n="intro"></p></header>
+<section id="challenge" class="card window-card" hidden aria-labelledby="challenge-title">
+  <h2 id="challenge-title" tabindex="-1"></h2>
+  <p id="challenge-evidence"></p>
+  <form id="decision">
+    <div class="window-controls">
+      <label><span data-i18n="chooseModel"></span><select id="pick-model" required></select></label>
+      <label><span data-i18n="chooseAction"></span><select id="pick-action" required></select></label>
+    </div>
+    <label for="reason" data-i18n="reasonLabel"></label>
+    <input id="reason" maxlength="240" autocomplete="off">
+    <button type="submit" id="advance"></button>
+  </form>
+  <p id="decision-summary" hidden></p>
+  <button type="button" id="save-decision" data-i18n="saveDecision" hidden></button>
+  <a href="#lab" data-i18n="exploreLab"></a>
+</section>
+<p id="challenge-link"><a href="#challenge" data-i18n="tryChallenge"></a></p>
 <div class="toolbar">
   <div class="field">
     <label for="sample" data-i18n="examples"></label>
@@ -543,6 +562,26 @@ const strings = {
     "plotAria": "Observed values and fitted curves",
     "residualAria": "Residuals of the lowest-AICc fit",
     "compare": "Model comparison",
+    "challengeEarly": "16 observations. Would you stop sampling?",
+    "challengeLate": "48 more observations are in. What do you conclude now?",
+    "challengeDone": "What the later observations revealed",
+    "evidence": "The fit favors {0} (ΔAICc to runner-up {1}). {2} of 21 neighbors favor {3}. Both methods use these same {4} observations.",
+    "chooseModel": "Which model would you report?",
+    "chooseAction": "What would you do next?",
+    "reasonLabel": "What evidence guided you? (optional, no names)",
+    "choose": "Choose…",
+    "uncertain": "Undecided",
+    "stop": "Stop sampling",
+    "more": "Collect more data",
+    "revealMore": "Save decision and reveal 48 more points",
+    "revealTruth": "Save decision and reveal the generating model",
+    "debrief": "This simulation used two exponential components. The short window gave all 21 shape votes to a single exponential. A unanimous vote describes similarity within the observed window. It cannot rule out a slower component beyond it.",
+    "decisionSummary": "Your decisions · 16 points: {0}, {1}. 64 points: {2}, {3}.",
+    "saveDecision": "Download my two decisions (JSON)",
+    "exploreLab": "Open the full lab",
+    "tryChallenge": "Try the sampling challenge",
+    "blindCase": "Sampling challenge",
+    "challengeIntro": "Inspect the evidence and commit to a sampling decision before revealing the rest of the curve. Your answers stay on this device.",
     "aligned": "Methods agree in this window: {0}",
     "caution": "Treat the model choice as uncertain",
     "weak": "The best fit explains little of the variation relative to a flat signal.",
@@ -556,7 +595,7 @@ const strings = {
     "fitRankHelp": "Smaller ΔAICc is better. RMSE uses the original signal units.",
     "model": "Model",
     "knn": "Nearest-neighbor shape check",
-    "knnHelp": "Vote shares among the 21 nearest simulated curves.",
+    "knnHelp": "Vote shares among the 21 nearest simulated curves. Both methods use the same observations.",
     "benchmark": "Validation and stress tests",
     "benchmarkIntro": "AICc and kNN were compared on the same curves within each row. All benchmark curves were simulated with balanced labels and independent random seeds.",
     "scenario": "Test condition",
@@ -678,6 +717,26 @@ const strings = {
     "plotAria": "观测散点与候选模型拟合曲线",
     "residualAria": "AICc 最低模型的残差图",
     "compare": "模型比较",
+    "challengeEarly": "只有 16 个观测点。你会停止采样吗？",
+    "challengeLate": "又获得了 48 个观测点。现在你怎么判断？",
+    "challengeDone": "后续观测揭示了什么",
+    "evidence": "拟合首选{0}（与第二名的 ΔAICc 为 {1}）。21 个近邻中有 {2} 个支持{3}。两种方法使用的是同一组 {4} 个观测点。",
+    "chooseModel": "你会报告哪个模型？",
+    "chooseAction": "你会采取什么行动？",
+    "reasonLabel": "哪些证据影响了你的判断？（选填，请勿填写姓名）",
+    "choose": "请选择",
+    "uncertain": "暂无法判别",
+    "stop": "停止采样",
+    "more": "继续采样",
+    "revealMore": "记录判断并查看后续 48 个点",
+    "revealTruth": "记录判断并揭晓生成模型",
+    "debrief": "这条模拟曲线由两个指数分量生成。短窗口的 21 个近邻全部投给了单指数。全票说明已观测区间内的形状相似，仍然可能漏掉尚未显现的慢分量。",
+    "decisionSummary": "你的判断 · 16 点：{0}，{1}。64 点：{2}，{3}。",
+    "saveDecision": "下载我的两次判断（JSON）",
+    "exploreLab": "进入完整实验台",
+    "tryChallenge": "体验采样盲测",
+    "blindCase": "采样盲测",
+    "challengeIntro": "先根据眼前的证据作出采样决定，再查看曲线的后半段。回答保存在当前页面，可自行导出。",
     "aligned": "当前窗口内两种方法一致：{0}",
     "caution": "模型选择仍有不确定性",
     "weak": "最佳拟合相比水平线只能解释较少的变化。",
@@ -691,7 +750,7 @@ const strings = {
     "fitRankHelp": "ΔAICc 越小越好，RMSE 与原信号同单位。",
     "model": "候选模型",
     "knn": "近邻形状检验",
-    "knnHelp": "来自最接近的 21 条模拟曲线的投票比例。",
+    "knnHelp": "票数来自最接近的 21 条模拟曲线。两种方法使用同一组观测数据。",
     "benchmark": "验证与压力测试",
     "benchmarkIntro": "每一行在同一批曲线上同时测试 AICc 和 kNN。样例均为模拟生成，各类别数量相同，测试随机种子独立。",
     "scenario": "测试条件",
@@ -1024,11 +1083,12 @@ function setLocale(next) {
   const paired = benchmark.pairedWindow;
   byId("paired-finding").textContent = tr("pairedFinding", 3 * paired.perModel, paired.fitFlips,
     paired.shapeFlips, paired.shortMistakesWithoutWarnings, paired.flaggedByComparison, paired.shortCorrect, paired.flaggedCorrect);
-  if (dataset) renderData();
+  if (dataset) { renderData(); showDecision(); }
   if (lastError) showError(lastError);
 }
 
 function displayTitle(meta) {
+  if (meta.blind) return tr("blindCase");
   return meta.example === undefined ? meta.fileName : tr("sample" + meta.example);
 }
 
@@ -1437,8 +1497,80 @@ byId("export").addEventListener("click", () => {
 });
 
 new ResizeObserver(drawCharts).observe(byId("plot"));
+const challenge = {stage:0, answers:[]};
+const stages = ["challengeEarly","challengeLate","challengeDone"];
+function choiceLabel(value) {
+  const kind = models.findIndex(model => model.key === value);
+  return kind >= 0 ? modelName(kind) : tr(value);
+}
+function fillChoices(id, keys) {
+  const select = byId(id);
+  const selected = select.value;
+  select.replaceChildren(...["", ...keys].map(key => new Option(key ? choiceLabel(key) : tr("choose"),key)));
+  select.value = selected;
+}
+function showDecision() {
+  if (byId("challenge").hidden) return;
+  const stage = challenge.stage;
+  const done = stage === 2;
+  byId("challenge-title").textContent = tr(stages[stage]);
+  byId("challenge-evidence").textContent = done ? tr("debrief") : tr("evidence",
+    modelName(current.fits[0].kind), current.diagnostic.delta.toFixed(2),
+    current.guess.tally[current.guess.top], modelName(current.guess.top), current.raw.length);
+  byId("decision").hidden = done;
+  byId("save-decision").hidden = !done;
+  byId("decision-summary").hidden = !done;
+  if (done) {
+    const [a,b] = challenge.answers;
+    byId("decision-summary").textContent = tr("decisionSummary",choiceLabel(a.model),choiceLabel(a.action),
+      choiceLabel(b.model),choiceLabel(b.action));
+  } else {
+    fillChoices("pick-model", [...models.map(m => m.key),"uncertain"]);
+    fillChoices("pick-action", ["stop","more"]);
+    byId("advance").textContent = tr(stage === 0 ? "revealMore" : "revealTruth");
+  }
+}
+function loadChallengeStage() {
+  const count = challenge.stage === 0 ? 16 : 64;
+  setData(sample(1).slice(0,count), {source:"synthetic",blind:true});
+  showDecision();
+}
+function openMode() {
+  const blind = location.hash !== "#lab";
+  importGeneration += 1;
+  document.body.classList.toggle("blind",blind);
+  byId("challenge").hidden = !blind;
+  byId("challenge-link").hidden = blind;
+  byId("intro-text").dataset.i18n = blind ? "challengeIntro" : "intro";
+  byId("intro-text").textContent = tr(byId("intro-text").dataset.i18n);
+  if (blind) {
+    challenge.stage = 0;
+    challenge.answers = [];
+    byId("decision").reset();
+    loadChallengeStage();
+  } else {
+    samples.value = "1";
+    loadExample(1);
+  }
+}
+byId("decision").addEventListener("submit", event => {
+  event.preventDefault();
+  if (challenge.stage >= 2 || byId("challenge").hidden) return;
+  challenge.answers.push({observations:current.raw.length, model:byId("pick-model").value,
+    action:byId("pick-action").value, reason:byId("reason").value.trim()});
+  challenge.stage += 1;
+  byId("decision").reset();
+  if (challenge.stage === 1) loadChallengeStage();
+  else showDecision();
+  byId("challenge-title").focus();
+});
+byId("save-decision").addEventListener("click", () => {
+  if (challenge.stage !== 2) return;
+  download("decay-lab-decisions.json", JSON.stringify({activity:"sampling-challenge-v1",
+    generatingModel:"double",decisions:challenge.answers},null,2) + "\n","application/json");
+});
+window.addEventListener("hashchange",openMode);
 setLocale("en");
-samples.value = "1";
-loadExample(1);
+openMode();
 </script>
 </body></html>
